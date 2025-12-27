@@ -190,14 +190,18 @@ After setup, you have a run directory and a PR to harvest feedback from.
 - Grabs all available feedback (bots, humans, CI)
 - Grabs partial CI failures if jobs are still running but already failing
 - Doesn't wait for pending checks
+- **Non-blocking:** Returns immediately with what's available. CI latency is handled by re-harvest during checkpoints, not by waiting.
 
 **Call `review-worklist-writer`:**
 - Clusters feedback into Work Items (by file/theme, not individual comments)
 - 50 comments → 5-10 Work Items
 - Items get stable `RW-NNN` IDs
 - Markdown nits grouped into single `RW-MD-SWEEP`
+- **Owns worklist state:** Workers report naturally what they did. This agent parses responses and updates `review_worklist.json`. The worker's job is to fix code; this agent's job is to track status.
 
 **Route on worklist:** If no items, proceed to Close. Otherwise, enter Execute loop.
+
+**Non-Blocking Principle:** Push. Immediately Harvest. If new blockers appear, add to list. If not, **keep working on the existing list.** Don't stall waiting for bots to think. Drain the known queue first.
 
 ---
 
@@ -240,6 +244,18 @@ while pending > 0 and not exhausted:
 ```
 
 **Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` in apply mode to parse the worker's response and update state.
+
+**Handling Design Feedback (Law 7: Local Resolution):**
+
+If a reviewer flags a fundamental design issue (not just a code fix):
+1. **Call `design-optioneer`** to analyze the feedback against the current code and ADR
+2. **If the analysis suggests a scoped fix:** Call `code-implementer` to apply it
+3. **Verification:** Run `test-executor` to confirm no regressions
+4. **Report back:** "Resolved design concern [RW-NNN] with surgical refactor; verified with tests."
+
+**Write-Through Requirement:** When `design-optioneer` resolves a design snag, it MUST use the Edit tool to update the relevant plan artifact (`adr.md`, `ac_matrix.md`, or `work_plan.md`) immediately. This ensures the resolution survives context resets and is visible to subsequent agents.
+
+**Only escalate to Flow 2** if the design feedback invalidates the entire architecture.
 
 **Workers report naturally:** Fix-lane agents (code-implementer, fixer, test-author, doc-writer) do their job and describe what happened. They don't need special output formats. The `review-worklist-writer` parses their natural language response to update item statuses.
 
