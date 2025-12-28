@@ -4,7 +4,7 @@ SDLC pack for Claude Code.
 
 **Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
 
-**Operating principle:** Spend machine iteration to buy down human uncertainty.
+**Operating principle:** Spend machine iteration to reduce human uncertainty.
 
 **What it produces:** A PR with evidence (tests, receipts, critiques) you can review in minutes, not hours.
 
@@ -83,7 +83,7 @@ If a flow exits **PARTIAL**, that's a save point: state is on disk, next steps a
 | `.claude/agents/` | Stations: workers, critics, auditors, operators |
 | `.claude/skills/` | Deterministic helpers (test-runner, auto-linter, etc.) |
 | `tools/` | Rust CLI tooling (pack-check, runs-derive) |
-| `.runs/` | Run artifacts (in the target repo) |
+| `.runs/` | Run artifacts (in your working swarm repo) |
 
 ---
 

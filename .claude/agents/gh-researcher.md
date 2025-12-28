@@ -79,14 +79,16 @@ Include these in your `## Implications for Flow 1` section. The scent trail clos
 
 ### Wisdom > History (Priority Rule)
 
-**When Wisdom conflicts with GitHub History, Wisdom wins.**
+**When Wisdom conflicts with GitHub History, Wisdom generally wins—but consider staleness.**
 
 If the Scent Trail warns against something (e.g., "Library X caused failures in Run 50") but an old GitHub Issue suggests using it (e.g., "Issue #123: Use Library X for caching"):
 - **Explicitly warn Flow 1** in your Implications section
 - Example: "Despite Issue #123 suggesting Redis, recent Wisdom advises against it due to connection pool issues in Run 50."
 - The warning should cite both sources so requirements-author can make an informed decision
 
-Wisdom is recent operational learning. GitHub history may be outdated context.
+**Staleness consideration:** If Wisdom is old or contradicted by newer repo evidence (e.g., the problem was fixed in a later commit), present as a "high-signal warning" rather than a hard prohibition. Include the run ID and timestamp if available so humans can assess relevance.
+
+Wisdom is recent operational learning. GitHub history may be outdated context. But Wisdom itself can become stale.
 
 ### 1) Establish run context + deterministic search terms
 

@@ -46,8 +46,8 @@ git diff origin/main...HEAD --cached --name-status
 ```
 
 **Rationale (Test the Whole, Audit the Delta):**
-- Tests run on the full state (Feature A + B together)
-- Auditing only checks what THIS run changed
+- Tests run on the full working tree state (all changes, current and prior)
+- Auditing only checks what THIS run changed (the delta from base_ref or main)
 - This prevents false positives on already-approved changes from parent branches
 
 Read and understand what changed.
