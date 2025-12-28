@@ -224,12 +224,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 5: Write ADR
 - Use `adr-author` to write the ADR.
 
-### Step 6: Define contracts and schema (FIRST - others depend on this)
+### Step 6: Define contracts and schema (materials-first)
 - Use `interface-designer` for contracts/schema/migrations (planned migrations live under the run directory; actual migrations move during Build).
-- **This must complete before Steps 8-9** because:
+- **This must complete before Steps 8-9** (not Step 7) because:
   - `test-strategist` reads `schema.md` to plan test data/fixture updates
   - `test-strategist` reads `api_contracts.yaml` to generate contract-bound ACs
   - `work-planner` reads `migrations/` to schedule infrastructure subtasks (ST-000)
+- Step 7 (`observability-designer`) can run in parallel with Step 6 since it has no dependency on contracts/schema.
 
 ### Step 6b: Validate contracts (microloop; recommended)
 - Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.

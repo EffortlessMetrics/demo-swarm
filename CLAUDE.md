@@ -851,11 +851,14 @@ Do not conflate these domains:
 
 1. **Flow/Agent Status** (handoffs + receipts)
 
-   Agents express status through natural language in their handoffs. Use these concepts:
-   - **Complete / verified**: Required artifacts exist AND verification ran AND passed
-   - **Incomplete / unverified**: Gaps exist, contradictions, critical failures, or missing outputs
-   - **Partial**: Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review)
-   - **Blocked / cannot proceed**: Mechanical failure only (IO/permissions/tooling)
+   Agents express status through natural language in their handoffs. Receipts use the enum values.
+
+   | Prose (handoffs) | Enum (receipts) | Meaning |
+   |------------------|-----------------|---------|
+   | Complete / verified | `VERIFIED` | Required artifacts exist AND verification ran AND passed |
+   | Incomplete / unverified | `UNVERIFIED` | Gaps exist, contradictions, critical failures, or missing outputs |
+   | Partial | `PARTIAL` | Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review) |
+   | Blocked / cannot proceed | `CANNOT_PROCEED` | Mechanical failure only (IO/permissions/tooling) |
 
    **Verified requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default.
 

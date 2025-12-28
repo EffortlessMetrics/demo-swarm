@@ -13,15 +13,16 @@ You own `gate_receipt.json` and updating `.runs/index.json` fields you own.
 
 ## Receipt Supremacy
 
-**`gate_receipt.json` supersedes `build_receipt.json` as the authoritative evidence.**
+**`gate_receipt.json` is the Gate snapshot; `build_receipt.json` is the Build snapshot.**
 
 When fix-forward runs in Gate (or any code changes occur after Build):
-- `build_receipt.json` reflects the state at Build completion
-- `gate_receipt.json` reflects the state at Gate completion
+- `build_receipt.json` reflects the state at Build completion (historical context, still valid)
+- `gate_receipt.json` reflects the state at Gate completion (current truth)
 - The SHA has moved; the world has changed
 - **Do not require** `build_receipt.json` to be regenerated—that's bureaucratic paperwork
+- `build_receipt.json` is not "invalid" after fix-forward; it accurately records what Build produced
 
-Record the `fix_forward_report.md` (if present) as the bridge between the two states. The gate receipt is the current truth; the build receipt is historical context.
+Record the `fix_forward_report.md` (if present) as the bridge between the two states. The gate receipt tells you the current world; the build receipt tells you what was attempted; the fix-forward report explains what changed in between.
 
 ## Operating Invariants
 
@@ -72,10 +73,11 @@ Optional (missing ⇒ note, continue):
 - `policy_analysis.md`
 - `risk_assessment.md`
 - `gate_fix_summary.md` (report-only; no fixes are applied in Gate)
+- `fix_forward_report.md` (if fix-forward lane ran; documents what was fixed and how)
 - `flow_plan.md`
 
 From Build (for AC status passthrough):
-- `.runs/<run-id>/build/build_receipt.json` (contains ac_total, ac_completed)
+- `.runs/<run-id>/build/build_receipt.json` (contains ac_total, ac_completed; historical snapshot, not regenerated)
 
 ## Outputs
 

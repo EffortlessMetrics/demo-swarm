@@ -203,6 +203,8 @@ After setup, you have a run directory and a PR to harvest feedback from.
 
 **Non-Blocking Principle:** Push. Immediately Harvest. If new blockers appear, add to list. If not, **keep working on the existing list.** Don't stall waiting for bots to think. Drain the known queue first.
 
+**Exception for CRITICAL blockers:** If a newly harvested CRITICAL blocker invalidates the current approach or requires non-derivable human input, escalate immediately rather than adding to queue. Otherwise, add it and keep draining.
+
 ---
 
 ### Phase 2: Execute (Unbounded Loop)
