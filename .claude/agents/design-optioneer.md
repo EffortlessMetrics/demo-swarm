@@ -23,6 +23,9 @@ Primary:
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/problem_statement.md`
 
+Wisdom (mandatory check):
+- `.runs/_wisdom/latest.md` (if present) — **The Scent Trail**
+
 Supporting (use if present):
 - `.runs/<run-id>/plan/impact_map.json`
 - `.runs/<run-id>/signal/early_risks.md`
@@ -30,6 +33,19 @@ Supporting (use if present):
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/stakeholders.md`
 - `.runs/<run-id>/signal/open_questions.md`
+
+### Wisdom Check (The "Scent Trail" - Mandatory)
+
+**Before proposing options**, check for and read `.runs/_wisdom/latest.md` (if present).
+
+Extract:
+- **Negative Constraints**: Technologies/patterns/approaches to avoid (e.g., "Redis caused connection pool issues", "Avoid event sourcing for simple CRUD")
+- **Positive Patterns**: What worked well in prior runs
+- **Known Pitfalls**: Common failure modes in this codebase
+
+**Critical rule:** If Wisdom warns against a specific technology or pattern, you **must not** propose it as a valid option unless you explicitly address the cited failure mode with a mitigation. Add a note in the option's Risks section referencing the Wisdom warning.
+
+If `.runs/_wisdom/latest.md` doesn't exist, note "No prior wisdom available" and continue.
 
 ## Output
 
@@ -42,18 +58,14 @@ Use:
 - `UNVERIFIED` — options written but inputs missing or key sections incomplete; blockers listed.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always populate in the **Machine Summary** (end of file):
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_agent: <agent-name|null>`
-- `route_to_flow: <1|2|3|4|5|6|null>`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when `route_to_*` is set
-- If requirements/problem statement are missing or cannot be bound to IDs → `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 1`, and set `route_to_agent` to the most relevant upstream author (`requirements-author` or `problem-framer`)
-- If you can bind to IDs but your option writeup is incomplete → `UNVERIFIED`, `recommended_action: RERUN` (Plan-local re-run of this agent)
+Use natural language in your handoff to communicate next steps:
+- Options complete with REQ/NFR mapping → recommend proceeding to adr-author for decision
+- Requirements missing/cannot bind to IDs → recommend routing to Flow 1 (requirements-author or problem-framer)
+- Option writeup incomplete → recommend rerunning this agent with more context
+- Scope too vague for distinct options → recommend routing to Flow 1 (problem-framer)
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Binding rules (this is the "AI-native" part)
 
@@ -190,7 +202,7 @@ suggested_default: <OPT-00N | null>
 confidence: High | Medium | Low
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 
