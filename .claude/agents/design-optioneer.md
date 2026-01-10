@@ -43,12 +43,7 @@ Extract:
 - **Positive Patterns**: What worked well in prior runs
 - **Known Pitfalls**: Common failure modes in this codebase
 
-**Wisdom integration rule:** If Wisdom warns against a specific technology or pattern, you **may still propose it** but you MUST:
-1. Surface the Wisdom warning prominently in the option's Risks section
-2. Explain why it might still be viable for this use case (or explicitly state "no known mitigation")
-3. If mitigations exist, describe them; if not, say so clearly
-
-The goal is informed decision-making, not suppression. ADR author and humans decide; you surface the signal.
+**Critical rule:** If Wisdom warns against a specific technology or pattern, you **must not** propose it as a valid option unless you explicitly address the cited failure mode with a mitigation. Add a note in the option's Risks section referencing the Wisdom warning.
 
 If `.runs/_wisdom/latest.md` doesn't exist, note "No prior wisdom available" and continue.
 

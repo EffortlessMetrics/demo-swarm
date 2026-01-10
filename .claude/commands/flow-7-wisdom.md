@@ -593,7 +593,7 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 
 **Quality-first reporting (mandatory priority order):** The GitHub postmortem should lead with:
 1. **Solution Verdict** — Did we solve the right problem? (from `solution-analyst`)
-2. **Asset Health** — Headline rating from `quality-analyst` (complexity score, health grade); supporting evidence and hotspots from `maintainability-analyst`
+2. **Asset Health** — Complexity/maintainability score (from `quality-analyst`, `maintainability-analyst`)
 3. **Sad Path Coverage** — Were negative scenarios tested? (from `solution-analyst`)
 4. **Quality Summary** — Code health assessment
 
