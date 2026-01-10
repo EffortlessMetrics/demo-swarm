@@ -4,7 +4,7 @@ SDLC pack for Claude Code.
 
 **Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
 
-**Operating principle:** Spend machine iteration to reduce human uncertainty.
+**Operating principle:** Spend machine iteration to buy down human uncertainty.
 
 **What it produces:** A PR with evidence (tests, receipts, critiques) you can review in minutes, not hours.
 
