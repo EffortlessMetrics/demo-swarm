@@ -1,4 +1,5 @@
 ---
+name: flow-5-gate
 description: Run Flow 5 (Code -> Artifact): verify receipts, contracts, security, policies; decide merge vs bounce; execute bounded fix-forward lane when eligible.
 ---
 
@@ -32,6 +33,39 @@ You are the PM orchestrating Flow 5 of the SDLC swarm. Your team of specialist a
 - Enforce policies
 - Decide: MERGE / BOUNCE (with reason for human-review vs fix-required)
 - **Runner-bounded fix-forward lane** for deterministic mechanical drift (fmt/import/whitespace/docs) when `gate-fixer` says it is safe and resealable
+
+## Convergence Discipline
+
+**Gate runs to completion. It never stops mid-execution.**
+
+A Gate ends with one of two statuses:
+
+| Status | When | What It Means |
+|--------|------|---------------|
+| **VERIFIED** | Evidence says done | All verification agents pass, merge-decider renders verdict, evidence is fresh |
+| **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable—BOUNCE with reason |
+
+External constraints are rare (budget/access/authority). Everything else is routing.
+
+### What "Pass" Means in Gate
+
+| Condition | Status |
+|-----------|--------|
+| Agent reports clean, evidence exists | PASS |
+| Agent reports issues, evidence exists | FAIL (route to fix or BOUNCE) |
+| Agent reports clean, no evidence | UNKNOWN (not PASS) |
+| Agent cannot run | BLOCKED (mechanical failure) |
+
+**UNKNOWN is not PASS.** A verification agent that doesn't produce evidence has not verified.
+
+### Routing to Unstick in Gate
+
+- **Stagnation** (same issues across reruns) → route to a different approach, not stop
+- **Fix-forward not converging** → after 2 iterations, BOUNCE to Flow 3 (this is routing, not giving up)
+
+The orchestrator's job is to keep things moving. When progress stalls, route to unstick. Gate's primary unstick route is BOUNCE to Build or Review.
+
+**Do NOT mark MERGE when verification has not converged.** BOUNCE with documented reason instead.
 
 ## Role Clarification: Final Verification, Not Primary Detection
 
@@ -122,6 +156,7 @@ Cross-cutting agents:
 - risk-analyst
 - policy-analyst
 - traceability-auditor (run-level coherence + spec traceability before merge decision)
+- evidence-sufficiency-critic (evaluate if evidence panel is sufficient for risk level; optional, before merge-decider)
 
 Cleanup + Reporting (End of Flow):
 - gate-cleanup -- writes gate_receipt.json, updates index.json status
@@ -256,6 +291,12 @@ Treat fix-forward as a **subroutine station**, not a per-call checklist.
 If the runner reports `changes_detected: true`, update build receipt + stage + secrets gate + commit/push the runner-touched scope, then run the confirm pass.
 
 If the runner reports UNVERIFIED or scope violation, proceed with remaining Gate stations; `merge-decider` should BOUNCE to Flow 3 with the runner report as evidence.
+
+**Fix-forward routing:** After two passes, if `modified_files` persists (non-convergent fixes), this lane isn't converging—route out:
+- Document the state in `gate_fix_summary.md`
+- BOUNCE to Flow 3 to address remaining issues
+- The fix-forward lane stops; the flow continues via Build
+- Do NOT mark MERGE when fix-forward has not converged
 
 ### Step 8: Traceability audit
 - `traceability-auditor` -> `.runs/<run-id>/gate/traceability_audit.md`

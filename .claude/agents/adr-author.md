@@ -176,22 +176,6 @@ Use stable markers and include suggested defaults:
 - Keep inventory lines short to avoid wrapping.
 - Inventory is for receipts/counts; the real content is in the sections above.
 
-## Handoff Guidelines
-
-After writing the ADR file, provide a natural language summary covering:
-
-**Success scenario (decision bound to evidence):**
-- "Chose OPT-003 (Hybrid OAuth + JWT) based on REQ-001, REQ-005, and NFR-SEC-001. Documented 3 alternatives, 5 risks with mitigations, and 2 assumptions. No unresolved questions blocking implementation. Ready to proceed to contracts and observability specs."
-
-**Issues found (binding gaps):**
-- "Wrote ADR for OPT-002 but drivers are weakly bound—only 2 of 5 REQs have IDs in requirements.md. Recommend clarifier review requirements.md or continue with current binding and mark UNVERIFIED."
-
-**Mechanical failure:**
-- "Cannot write .runs/<run-id>/plan/adr.md due to permissions. Route to fix environment, then rerun."
-
-**Upstream needs (design options unclear):**
-- "design_options.md presents 3 options but doesn't identify which requirements each satisfies. Recommend design-optioneer strengthen the option analysis before I can bind a decision."
-
 ## Handoff Targets
 
 Your default recommendation is **design-critic** to validate the ADR, or **interface-designer** if the design is already validated and contracts are the next step.

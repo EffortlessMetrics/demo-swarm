@@ -1,4 +1,5 @@
 ---
+name: flow-4-review
 description: "Run Flow 4 (Review): harvest PR feedback, apply fixes, flip Draft to Ready when complete."
 ---
 
@@ -117,6 +118,7 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 
 **Polish and wrap-up**:
 - build-cleanup -- reseal build receipt after code changes
+- review-cockpit-designer -- design PR description for reviewer efficiency (optional, before pr-commenter)
 - review-cleanup -- write review_receipt.json, update index
 
 **Cleanup + Reporting (End of Flow)**:
@@ -246,18 +248,6 @@ while pending > 0 and not exhausted:
 ```
 
 **Key principle:** You direct agents and read their reports. The `review-worklist-writer` manages the worklist state and tells you what to work on next. Fix-lane agents report what they did. You route based on what they tell you.
-
-**Handling Design Feedback (Law 7: Local Resolution):**
-
-If a reviewer flags a fundamental design issue (not just a code fix):
-1. **Call `design-optioneer`** to analyze the feedback against the current code and ADR
-2. **If the analysis suggests a scoped fix:** Call `code-implementer` to apply it
-3. **Verification:** Run `test-executor` to confirm no regressions
-4. **Report back:** "Resolved design concern [RW-NNN] with surgical refactor; verified with tests."
-
-**Write-Through Requirement:** When `design-optioneer` resolves a design snag, it MUST use the Edit tool to update the relevant plan artifact (`adr.md`, `ac_matrix.md`, or `work_plan.md`) immediately. This ensures the resolution survives context resets and is visible to subsequent agents.
-
-**Only escalate to Flow 2** if the design feedback invalidates the entire architecture.
 
 **Handling Design Feedback (Law 7: Local Resolution):**
 

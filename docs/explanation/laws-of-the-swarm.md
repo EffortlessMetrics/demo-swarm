@@ -6,7 +6,7 @@
 
 ## Purpose
 
-These are the ten laws. Everything else in the pack derives from or supports these. Violating them breaks the system.
+These are the eleven laws. Everything else in the pack derives from or supports these. Violating them breaks the system.
 
 **The laws are not rules to follow. They are physics to respect.**
 
@@ -137,19 +137,19 @@ When an agent hits a logic gap, design contradiction, or implementation snag: ca
 
 ### Law 8: Truth Flows Downward
 
-Kernel > derived > intent > binary > narrative. When sources conflict, trust flows down.
+Tool outputs > derived facts > intent > implementation > narrative. When sources conflict, trust flows down.
 
-**Corollary:** An agent's claim does not override an exit code.
+**Corollary:** An agent's claim does not override tool output.
 
 The hierarchy:
-1. **Kernel:** OS, filesystem, tool exit codes (cannot be argued with)
-2. **Derived:** Counts and metrics from deterministic tools
+1. **Tool outputs:** Exit codes, stdout, test results (what actually happened)
+2. **Derived facts:** Counts and metrics extracted from outputs
 3. **Intent:** BDD scenarios, ADRs, contracts (what we meant to build)
-4. **Binary:** Implementation code (what we actually built)
-5. **Narrative:** Agent chat, status updates (useful for debugging, not for truth)
+4. **Implementation:** Code (what we actually built)
+5. **Narrative:** Agent chat, status updates (useful for reasoning, not for truth)
 
 **Violation:** "The agent said tests passed, so we proceed."
-**Correct:** "The receipt shows exit code 0 and 0 failures. We proceed."
+**Correct:** "The test runner shows exit code 0 and 0 failures. We proceed."
 
 ---
 
@@ -176,6 +176,51 @@ Flow 7 (Wisdom) extracts learnings from completed runs. Patterns that fail repea
 
 **Violation:** The same type failure occurs across three runs. No change is proposed.
 **Correct:** After the second failure, Flow 7 proposes a template update or agent prompt clarification.
+
+---
+
+### Law 11: Keep Going
+
+Flows run to completion. Counts are not exit criteria. Almost everything is routing.
+
+**Corollary:** "3 tries then move on" is a system failure. "3 tries" → run it again.
+
+### What "Keep Going" Means
+
+- **Counts are never completion criteria.** "We've run 3 times" justifies nothing.
+- **Counts are never "move on" criteria.** You don't proceed because you're tired of trying.
+
+### Stagnation Is Evidence-Based
+
+**Definition:** no new signal (same failure signature, same evidence, no meaningful diff change).
+
+Response: reroute, don't stop:
+- **Same failure, no new signal** → route to a different agent, change approach
+- **Oscillation** (toggling between states) → break the cycle by routing differently
+
+Counts alone don't detect stagnation. Evidence does.
+
+The orchestrator's job is to keep things moving. When progress stalls, route to unstick. That's orchestration.
+
+### The Only External Constraints (All Rare)
+
+| Constraint | What It Means | How Rare |
+|------------|---------------|----------|
+| **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
+| **Access** | Tooling broken, permissions missing, infra down | Rare |
+| **Authority** | Non-derivable decision with no safe default | Very rare (prefer DEFAULTED + log) |
+
+When an external constraint hits, checkpoint UNVERIFIED and continue when the constraint clears. The flow still runs to completion—it just ends with honest state instead of green evidence.
+
+| Wrong | Right |
+|-------|-------|
+| "3 tries, moving on" | "3 tries, running again" |
+| "Stagnation detected, stopping" | "Stagnation detected, routing to different agent" |
+| "Max iterations, proceeding as done" | "Still not converged, change approach" |
+| "Timeout, assuming success" | "External constraint hit, checkpointing UNVERIFIED" |
+
+**Violation:** "We tried 3 times, proceeding to Gate anyway."
+**Correct:** "3 tries with same failure. Routing to a different agent to unstick."
 
 ---
 
@@ -224,6 +269,7 @@ These are not preferences or style choices. They are the physics that makes the 
 | Law 8 (Truth Flows Downward) | Agents override exit codes, hallucinated success |
 | Law 9 (Artifacts Reduce Work) | Artifact bloat, noise drowns signal |
 | Law 10 (System Improves) | Same failures repeat indefinitely |
+| Law 11 (Keep Going) | Early exit, count-based completion, treating routing as stopping |
 
 The laws emerged from failure. They encode what breaks when ignored.
 

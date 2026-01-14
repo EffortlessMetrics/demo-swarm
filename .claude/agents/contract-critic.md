@@ -141,31 +141,6 @@ Write findings that explain what's missing and how to fix it.
 
 **Partial progress is success:** If you validated contracts but schema.md is missing, report what you validated.
 
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When contracts are complete:**
-> **What I found:** Validated api_contracts.yaml against requirements. All 5 endpoints have request/response schemas, consistent error model using ErrorResponse shape, and auth requirements documented.
->
-> **What's left:** Nothing blocking - contracts ready for implementation.
->
-> **Recommendation:** Proceed to Build.
-
-**When issues need fixing:**
-> **What I found:** Found 3 CRITICAL issues: missing error schemas for POST /users and DELETE /sessions, no pagination spec for GET /items (returns unbounded list).
->
-> **What's left:** 3 critical contract gaps need addressing.
->
-> **Recommendation:** Run interface-designer to complete error schemas and add pagination. One pass should resolve these.
-
-**When blocked:**
-> **What I found:** api_contracts.yaml is missing or unparseable.
->
-> **What's left:** Need valid contract specification.
->
-> **Recommendation:** Route to interface-designer to create contract spec.
-
 ## Handoff Targets
 
 Your default recommendation is **test-strategist** when contracts are complete, or **interface-designer** when they need revision.

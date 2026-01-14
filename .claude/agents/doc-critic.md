@@ -141,38 +141,6 @@ Write findings that explain what's stale and what to update.
 
 **Partial progress is success:** If you found some stale docs but couldn't check API docs due to missing contracts, report what you found.
 
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When docs are current:**
-> **What I found:** Reviewed README, API docs, and CLI help against impl_changes_summary. All sections accurately describe current behavior. Verification instructions match test_execution.md.
->
-> **What's left:** Nothing - docs are current.
->
-> **Recommendation:** Proceed to next phase.
-
-**When docs need updates:**
-> **What I found:** 3 stale surfaces: README auth section outdated, API docs missing new /sessions endpoint, config example has wrong port default.
->
-> **What's left:** 3 doc updates needed.
->
-> **Recommendation:** Run doc-writer to update these surfaces. One pass should fix all three.
-
-**When verification instructions are wrong:**
-> **What I found:** README says "run pytest" but test_execution.md shows "pytest tests/ --cov". Misleading for new contributors.
->
-> **What's left:** Verification instructions need updating.
->
-> **Recommendation:** Run doc-writer to correct test command in README.
-
-**When code/doc mismatch needs investigation:**
-> **What I found:** API docs claim POST /auth returns 201 but impl_changes_summary shows code returns 200. Unclear which is correct.
->
-> **What's left:** Need to determine intended behavior.
->
-> **Recommendation:** Route to interface-designer to clarify contract, then either doc-writer or code-implementer will fix the mismatch.
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

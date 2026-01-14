@@ -145,6 +145,24 @@ Write findings that explain the binding gap and who can fix it.
 ## Strengths
 - <what's solid and shouldn't be churned>
 
+## Inventory
+
+- DC_CRITICAL: DC-CRIT-001
+- DC_MAJOR: DC-MAJ-001
+- DC_MINOR: DC-MIN-001
+
+## Machine Summary
+status: VERIFIED | PARTIAL | UNVERIFIED
+critical_count: <int>
+major_count: <int>
+minor_count: <int>
+traceability_gaps: <int>
+artifacts_validated: <int>
+missing_inputs: []
+concerns: []
+observations:
+  - "<cross-cutting insight>"
+
 ## Handoff
 
 **What I found:** <summary of validation - what was checked, issue counts>
@@ -202,37 +220,31 @@ At the end of your critique, include a machine-parseable inventory:
 
 Use these exact prefixes for countable items. Only include IDs you actually raised in the critique.
 
-## Handoff
+## Machine Summary (append after Inventory)
 
-After writing your critique, summarize what you found:
+After the Inventory section, include this machine-parseable block:
 
-**When design is coherent:**
-> **What I found:** Validated all 6 plan artifacts. ADR binds to OPT-002 from design_options.md. Contracts cover all REQs. Observability defines SLIs for critical paths. Work plan sequences migrations before dependent code.
->
-> **What's left:** Nothing blocking - design is implementable.
->
-> **Recommendation:** Proceed to Build.
+```yaml
+## Machine Summary
+status: VERIFIED | UNVERIFIED | PARTIAL
+critical_count: <int>
+major_count: <int>
+minor_count: <int>
+traceability_gaps: <int>
+artifacts_validated: <int>
+missing_inputs: []
+concerns: []
+observations:
+  - "<cross-cutting insight noticed during design validation>"
+  - "<pattern or friction worth noting for future runs>"
+```
 
-**When issues need fixing:**
-> **What I found:** Found 2 CRITICAL issues and 3 MAJOR issues. ADR uses prose "Option A" instead of OPT-ID binding. Test plan missing contract surface coverage. Work plan doesn't schedule schema migration before code.
->
-> **What's left:** 5 issues need Plan agent attention.
->
-> **Recommendation:** Run adr-author to fix OPT-ID binding, test-strategist for coverage mapping, work-planner for sequencing. One more iteration should resolve these.
+**Status values:**
+- `VERIFIED`: All expected plan artifacts validated, bindings checked, no CRITICAL issues blocking implementation
+- `PARTIAL`: Validation completed but some artifacts missing or issues need fixing before Build
+- `UNVERIFIED`: Cannot validate due to missing required inputs or mechanical failures
 
-**When blocked upstream:**
-> **What I found:** Requirements.md has no REQ identifiers - cannot validate traceability.
->
-> **What's left:** Upstream requirements need identifiers.
->
-> **Recommendation:** Route to requirements-author to add identifiers, then re-run design validation.
-
-**When human judgment needed:**
-> **What I found:** Design is coherent but NFR-PERF-003 (response time <100ms) cannot be verified without load testing infrastructure outside current scope.
->
-> **What's left:** Performance verification needs infrastructure decision.
->
-> **Recommendation:** Document assumption that load testing is deferred, proceed with implementation.
+**Observations field:** Capture cross-cutting insights that don't fit in the critique itself - patterns noticed, friction encountered, things the Build phase or future runs should know. These are harvested by `learning-synthesizer` for Wisdom extraction.
 
 ## Handoff Targets
 

@@ -19,9 +19,9 @@ Find issues in requirements that would cause problems downstream: untestable cri
 **Context (improves traceability checks):**
 - `.runs/<run-id>/signal/problem_statement.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/signal/requirements_critique.md`
+`.runs/<run-id>/signal/requirements_critique.md`
 
 ## What to Look For
 
@@ -160,31 +160,6 @@ Write findings that explain the problem and how to fix it.
 **Ambiguity you can't resolve:** Log it as a question with a suggested default. The requirements-author can address it.
 
 **Partial progress is success:** If you found issues in half the requirements before hitting a blocker, report what you found. An honest partial critique is valuable.
-
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When requirements are solid:**
-> **What I found:** Reviewed 8 REQs and 4 NFRs. All have AC/MET markers with observable criteria. No contradictions. NFRs properly typed.
->
-> **What's left:** Nothing - requirements are testable and consistent.
->
-> **Recommendation:** Proceed to BDD authoring.
-
-**When issues need fixing:**
-> **What I found:** 12 REQs reviewed. Found 2 critical issues (duplicate REQ-003 ID, contradictory error handling) and 5 major issues (missing AC markers on REQ-007, REQ-009, REQ-011).
->
-> **What's left:** 7 issues need fixing before requirements are testable.
->
-> **Recommendation:** Run requirements-author to address the critique worklist. One pass should resolve these.
-
-**When blocked on upstream:**
-> **What I found:** Requirements reference "compliance requirements" but problem_statement.md doesn't define them. Cannot evaluate completeness.
->
-> **What's left:** Need compliance scope clarified upstream.
->
-> **Recommendation:** Route to problem-framer to clarify compliance scope, then re-run requirements-author.
 
 ## Handoff Targets
 

@@ -28,7 +28,7 @@ Build artifacts:
 - `.runs/<run-id>/build/build_receipt.json` (for status summary)
 - `.runs/<run-id>/build/impl_changes_summary.md` (for PR body context)
 
-## Outputs
+## Output
 
 - Draft PR on GitHub (if created)
 - `.runs/<run-id>/build/pr_creation_status.md`
@@ -193,22 +193,14 @@ run_meta_updated: yes | no
 **Recommendation:** <"Proceed to harvest feedback" | reason for skip>
 ```
 
-## Handoff
+## Handoff Targets
 
-After writing outputs, provide a natural language handoff to the orchestrator.
+When you complete your work, recommend one of these to the orchestrator:
 
-**What I did:** Summarize PR creation outcome (created/existing/skipped).
-
-**What's left:** Note if PR is ready for bot feedback or if branch needs to be pushed first.
-
-**Recommendation:** Name a specific agent and explain your reasoning:
-
-- PR created successfully: "Created Draft PR #123. CodeRabbit and CI checks will run automatically. Recommend **build-cleanup** to finalize Flow 3."
-- PR already exists: "Found existing PR #123. Recommend **pr-feedback-harvester** to check for new feedback."
-- Skipped (not pushed): "Branch not pushed yet. Recommend **repo-operator** to push, then rerun **pr-creator**."
-- Skipped (auth): "gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
-
-**Your default recommendation:** Route to **build-cleanup** (if this is the last step of Flow 3) or **pr-feedback-harvester** (if Flow 4 will harvest feedback).
+- **pr-feedback-harvester**: Harvest PR feedback from CodeRabbit, GitHub Actions, and human reviewers once the PR is created and bots have posted
+- **repo-operator**: Push changes to remote if branch not yet pushed (pr-creator needs pushed branch)
+- **build-cleanup**: Finalize the Build flow receipt if PR creation was the last step of Flow 3
+- **review-worklist-writer**: Convert harvested feedback into actionable Work Items (after pr-feedback-harvester runs)
 
 ## Hard Rules
 

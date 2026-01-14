@@ -23,9 +23,9 @@ Find issues in design options that would make ADR authoring difficult: options t
 - `.runs/<run-id>/signal/early_risks.md`
 - `.runs/<run-id>/plan/impact_map.json`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/plan/option_critique.md`
+`.runs/<run-id>/plan/option_critique.md`
 
 ## What to Look For
 
@@ -177,31 +177,6 @@ Write findings that explain the problem and provide fix guidance.
 **IO/permissions failure:** Report what's broken in your handoff.
 
 **Partial progress is success:** If you found distinctness issues but couldn't evaluate traceability due to missing requirements, report what you found.
-
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When options are decision-ready:**
-> **What I found:** Evaluated 3 design options. All are distinct (different data models), comparable (6 axes documented), and traceable to requirements. Risks are concrete with mitigations. Decision criteria present.
->
-> **What's left:** Nothing - options ready for ADR.
->
-> **Recommendation:** Proceed to adr-author.
-
-**When options need work:**
-> **What I found:** 5 major issues blocking decision-making. OPT-001 and OPT-002 are functionally identical. Missing failure mode analysis across all options. No rollout strategy documented.
->
-> **What's left:** Fix list for design-optioneer.
->
-> **Recommendation:** Run design-optioneer with this fix list. One pass should make options decision-ready.
-
-**When blocked upstream:**
-> **What I found:** Options reference "compliance requirements" but these aren't defined in requirements.md. Cannot evaluate whether options satisfy compliance constraints.
->
-> **What's left:** Need upstream clarification.
->
-> **Recommendation:** Route to requirements-author to clarify compliance requirements, then re-evaluate options.
 
 ## Handoff Targets
 

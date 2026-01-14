@@ -171,13 +171,16 @@ After scanning, report back with a natural language summary. The `secrets_status
 **Example (mechanical failure):**
 > Couldn't complete scan: secrets-tools skill not available. Fix the tooling issue and retry.
 
-### Handoff Targets
+## Handoff Targets
 
-- **repo-operator**: Proceed with commit/push (when safe_to_publish: true)
+When you complete your work, recommend one of these to the orchestrator:
+
+- **repo-operator**: Proceed with commit/push after secrets scan passes (safe_to_publish: true)
 - **code-implementer**: Fix hardcoded secrets in code when auto-redaction is not safe
+- **gh-issue-manager**: Update issue status after successful publish gate
 - **cleanup agents**: Continue flow cleanup after artifacts are sanitized
 
-**Default recommendation:** If clean or fixed, recommend repo-operator. If blocked with fixable issues, recommend code-implementer with specific guidance. Blocking is the last resort.
+**Your default recommendation:** If `safe_to_publish: true`, recommend repo-operator for commit/push. If `safe_to_publish: false` with remediable issues, recommend code-implementer with specific guidance. Blocking is the last resort, not the first.
 
 ## Philosophy
 

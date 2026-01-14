@@ -118,7 +118,7 @@ Write findings that explain what's wrong and what good looks like.
 - Requirements covered: N (or "unknown")
 - Scenarios total: N (or "unknown")
 
-## Handoff Guidelines
+## Handoff
 
 **What I found:** <summary of findings>
 
@@ -144,31 +144,6 @@ Write findings that explain what's wrong and what good looks like.
 **IO/permissions failure:** Report what's broken in your handoff.
 
 **Partial progress is success:** If you reviewed 5 of 8 feature files before hitting a blocker, report what you found. Honest partial critiques are valuable.
-
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When scenarios are solid:**
-> **What I found:** Reviewed 12 scenarios across 3 feature files. All have proper @REQ tags, observable Thens, and domain-level steps. Each REQ has both happy and sad path coverage. 2 minor naming suggestions.
->
-> **What's left:** Nothing blocking - scenarios are automation-ready.
->
-> **Recommendation:** Proceed to next phase.
-
-**When issues need fixing:**
-> **What I found:** Found 5 CRITICAL traceability issues (missing @REQ tags) and 3 MAJOR portability issues (HTTP-coupled steps without justification). REQ-004 and REQ-007 have only happy paths.
->
-> **What's left:** 8 major/critical issues need bdd-author attention.
->
-> **Recommendation:** Run bdd-author with this critique worklist. One pass should resolve these.
-
-**When blocked on upstream:**
-> **What I found:** Scenarios reference REQ-008 which says "appropriate error handling" - this is too vague to write testable assertions.
->
-> **What's left:** Upstream requirements need clarification.
->
-> **Recommendation:** Route to requirements-author to clarify REQ-008 error behavior, then re-run bdd-author.
 
 ## Handoff Targets
 

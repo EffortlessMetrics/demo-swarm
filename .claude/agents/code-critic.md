@@ -162,31 +162,6 @@ Write findings that explain the violation and its impact.
 
 **Partial progress is success:** If you reviewed 3 of 5 in-scope REQs before hitting a blocker, report what you found.
 
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When implementation is solid:**
-> **What I found:** Implementation covers all 5 in-scope REQs. No ADR violations. Contracts match. Auth properly enforced. Edge cases handled.
->
-> **What's left:** Nothing blocking - ready for test-critic.
->
-> **Recommendation:** Proceed to test-critic.
-
-**When issues need fixing:**
-> **What I found:** REQ-003 has no implementation. Session timeout uses 30m but ADR specifies 15m. POST /users returns 200 but contract says 201.
->
-> **What's left:** 3 issues need code-implementer attention.
->
-> **Recommendation:** Run code-implementer to implement REQ-003, fix timeout value, and correct status code. Then re-run me to verify.
-
-**When design questions arise:**
-> **What I found:** Implementation uses sessions but ADR-005 says "stateless auth". Either code is wrong or ADR interpretation needs clarification.
->
-> **What's left:** Need ADR clarification before code fix.
->
-> **Recommendation:** Route to design-optioneer to clarify ADR-005 intent, then code-implementer can align.
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
