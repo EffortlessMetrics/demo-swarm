@@ -30,9 +30,9 @@ Find issues in design artifacts that would cause expensive rework: missing bindi
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/early_risks.md`
 
-## Output
+## What You Produce
 
-output_file: .runs/<run-id>/plan/design_validation.md
+One file: `.runs/<run-id>/plan/design_validation.md`
 
 ## What to Look For
 
@@ -245,38 +245,6 @@ observations:
 - `UNVERIFIED`: Cannot validate due to missing required inputs or mechanical failures
 
 **Observations field:** Capture cross-cutting insights that don't fit in the critique itself - patterns noticed, friction encountered, things the Build phase or future runs should know. These are harvested by `learning-synthesizer` for Wisdom extraction.
-
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When design is coherent:**
-> **What I found:** Validated all 6 plan artifacts. ADR binds to OPT-002 from design_options.md. Contracts cover all REQs. Observability defines SLIs for critical paths. Work plan sequences migrations before dependent code.
->
-> **What's left:** Nothing blocking - design is implementable.
->
-> **Recommendation:** Proceed to Build.
-
-**When issues need fixing:**
-> **What I found:** Found 2 CRITICAL issues and 3 MAJOR issues. ADR uses prose "Option A" instead of OPT-ID binding. Test plan missing contract surface coverage. Work plan doesn't schedule schema migration before code.
->
-> **What's left:** 5 issues need Plan agent attention.
->
-> **Recommendation:** Run adr-author to fix OPT-ID binding, test-strategist for coverage mapping, work-planner for sequencing. One more iteration should resolve these.
-
-**When blocked upstream:**
-> **What I found:** Requirements.md has no REQ identifiers - cannot validate traceability.
->
-> **What's left:** Upstream requirements need identifiers.
->
-> **Recommendation:** Route to requirements-author to add identifiers, then re-run design validation.
-
-**When human judgment needed:**
-> **What I found:** Design is coherent but NFR-PERF-003 (response time <100ms) cannot be verified without load testing infrastructure outside current scope.
->
-> **What's left:** Performance verification needs infrastructure decision.
->
-> **Recommendation:** Document assumption that load testing is deferred, proceed with implementation.
 
 ## Handoff Targets
 

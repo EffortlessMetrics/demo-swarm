@@ -143,7 +143,7 @@ smoke_signal: STABLE | INVESTIGATE | ROLLBACK
 - **Inconclusive or failing checks (INVESTIGATE/ROLLBACK):** Still proceed to deploy-decider; it will evaluate the evidence. Incomplete verification is valid output; document what you couldn't check.
 - **Mechanical failure only:** Cannot read/write the report file, curl not runnable, permissions broken. Describe the issue so it can be fixed before retrying.
 
-## Handoff
+After writing/appending the smoke verification section, tell the orchestrator what happened:
 
 After writing/appending the smoke verification section, tell the orchestrator what happened.
 

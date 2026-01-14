@@ -328,8 +328,9 @@ name: test-agent
             "flow-1-signal.md",
             "flow-2-plan.md",
             "flow-3-build.md",
-            "flow-4-gate.md",
-            "flow-5-deploy.md",
+            "flow-4-review.md",
+            "flow-5-gate.md",
+            "flow-6-deploy.md",
             "flow-7-wisdom.md",
         ];
 
@@ -348,14 +349,14 @@ name: test-agent
     fn test_flow_command_naming_invalid() {
         let invalid_names = [
             "flow-0-zero.md",  // No flow 0
-            "flow-7-extra.md", // No flow 7
+            "flow-8-extra.md", // No flow 8
             "signal.md",       // Missing flow- prefix
             "flow-1.md",       // Missing name after number
             "flow-1-signal",   // Missing .md extension
         ];
 
         for name in invalid_names {
-            let is_valid = (1..=6).any(|i| {
+            let is_valid = (1..=7).any(|i| {
                 let prefix = format!("flow-{}-", i);
                 name.starts_with(&prefix) && name.ends_with(".md")
             });

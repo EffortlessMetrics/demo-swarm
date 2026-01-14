@@ -455,7 +455,7 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 - <warnings, e.g. "gh unauthenticated; skipped", "issue body markers missing; inserted new board", "issue edit failed; leaving body unchanged">
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing outputs, provide a natural language handoff to the orchestrator.
 

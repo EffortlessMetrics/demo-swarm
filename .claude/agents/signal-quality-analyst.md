@@ -225,7 +225,7 @@ Use `### SQ-FP-NNN:` for false positive entries:
 ### SQ-FP-002: FB-RC-234567890
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the signal quality report, report back with what you found and your recommendation for next steps.
 

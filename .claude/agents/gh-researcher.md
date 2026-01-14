@@ -202,23 +202,6 @@ At the end of `github_research.md`, include:
 **Recommendation:** Name a specific agent and explain reasoning based on findings.
 ```
 
-## Handoff
-
-After writing the file, provide a natural language handoff to the orchestrator.
-
-**What I did:** Summarize what research was performed and key findings.
-
-**What's left:** Note GitHub access state and any missing inputs.
-
-**Recommendation:** Name a specific agent and explain your reasoning:
-
-- Found relevant items: "Research found constraints and patterns. Recommend **problem-framer** to incorporate findings into problem framing."
-- GitHub unavailable: "GitHub context missing but local pointers found. Recommend **problem-framer** to proceed with available context."
-- Repo identity unclear: "Repo identity unclear. Recommend **clarifier** to bind GitHub repo in run_meta for future research."
-- Mechanical failure: "Cannot write output file. Fix [specific issue] then rerun **gh-researcher**."
-
-**Your default recommendation:** Route to **problem-framer**. Research provides context for problem framing.
-
 ## Research-First Protocol (Law 5)
 
 **You are a research specialist.** When invoked to resolve ambiguity:

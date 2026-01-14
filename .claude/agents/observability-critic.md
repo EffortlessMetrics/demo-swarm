@@ -140,31 +140,6 @@ Write findings that explain what's missing and why it matters.
 
 **Partial progress is success:** If you found safety issues but couldn't verify traceability due to missing requirements, report what you found.
 
-## Handoff
-
-After writing your critique, summarize what you found:
-
-**When spec is solid:**
-> **What I found:** Validated observability_spec.md. All 3 critical journeys have golden signal metrics. PII handling documented with explicit redaction rules. SLO defined for login latency with corresponding alert and runbook.
->
-> **What's left:** Nothing blocking - observability spec ready for Build.
->
-> **Recommendation:** Proceed to Build.
-
-**When issues need fixing:**
-> **What I found:** Found 2 CRITICAL issues and 4 MAJOR issues. No latency metric for payment flow (REQ-003). Alert for auth failures has no runbook pointer. PII guidance missing for user search logs.
->
-> **What's left:** 6 issues need observability-designer attention.
->
-> **Recommendation:** Run observability-designer to add payment metrics, runbook pointers, and PII guidance. One pass should resolve these.
-
-**When blocked upstream:**
-> **What I found:** Requirements don't specify performance targets. Cannot validate SLO appropriateness without NFR-PERF constraints.
->
-> **What's left:** Need performance requirements from upstream.
->
-> **Recommendation:** Route to requirements-author to add NFR-PERF targets, then re-run observability validation.
-
 ## Handoff Targets
 
 Your default recommendation is **test-strategist** when spec is solid, or **observability-designer** when issues need fixing.

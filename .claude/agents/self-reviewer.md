@@ -151,7 +151,13 @@ Use these patterns to determine your recommendation:
 * If remaining issues require design/spec answers: recommend bouncing to **interface-designer** (Flow 2) or **requirements-author** (Flow 1).
 * If everything is clean: recommend proceeding to **build-cleanup**.
 
-## Handoff
+* If you cannot read/write due to IO/perms: status is CANNOT_PROCEED, recommend fixing the environment.
+* If `test_critique.md` missing: status is UNVERIFIED, recommend running **test-critic**.
+* If `code_critique.md` missing: status is UNVERIFIED, recommend running **code-critic**.
+* If test-critic is UNVERIFIED and iteration could help: recommend **test-author** to address gaps.
+* If code-critic is UNVERIFIED and iteration could help: recommend **code-implementer** to fix issues.
+* If remaining issues require design/spec answers: recommend bouncing to **interface-designer** (Flow 2) or **requirements-author** (Flow 1).
+* If everything is clean: recommend proceeding to **build-cleanup**.
 
 After writing the self review, report back with a natural language summary.
 
@@ -163,13 +169,6 @@ After writing the self review, report back with a natural language summary.
 
 **Example (critic UNVERIFIED):**
 > Test-critic is UNVERIFIED due to missing coverage for REQ-003. Route to **test-author** to add the missing tests.
-
-## Handoff Targets (reference)
-
-- **build-cleanup**: Seals the Build receipt. Default when artifacts are consistent and ready for Gate.
-- **test-executor**: Regenerates test results when canonical summaries mismatch.
-- **code-implementer**: Fixes implementation issues when critics flagged code changes needed.
-- **test-author**: Addresses test coverage gaps when test-critic reported missing coverage.
 
 ## Handoff Targets
 

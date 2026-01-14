@@ -190,7 +190,7 @@ Heuristic guidance (use if counts are available):
 * `UNVERIFIED`: missing inputs, markers absent, or estimate is driven by assumptions/unknowns.
 * `CANNOT_PROCEED`: IO/permissions prevents writing outputs.
 
-## Handoff
+## Handoff Guidelines
 
 After writing all outputs, report back with what you found and your recommendation for next steps.
 
@@ -200,15 +200,6 @@ Your handoff should explain:
 - Key counts you derived (REQs, scenarios, integration points, risks by severity)
 - Any missing inputs or gaps that affected your assessment
 - Your recommendation for which agent should handle this next
-
-## Handoff Targets
-
-Your default recommendation is **spec-auditor**. After scope assessment, the spec needs holistic validation before Flow 2.
-
-Other targets when conditions apply:
-- **requirements-author**: Use when requirements are missing and scope cannot be accurately assessed.
-- **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
-- **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
 
 ## Handoff Targets
 

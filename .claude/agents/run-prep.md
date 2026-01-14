@@ -83,6 +83,61 @@ If fallback was used, note the ambiguity in your handoff.
 
 ## Create Directories
 
+Directories:
+- `.runs/`
+- `.runs/<run-id>/`
+- `.runs/<run-id>/<flow>/`
+
+Files:
+- `.runs/<run-id>/run_meta.json` (create or merge)
+- `.runs/index.json` (upsert entry)
+
+## Graceful Outcomes
+
+**Success:** Infrastructure established, identity resolved cleanly, ready for domain work.
+
+**Partial:** Infrastructure established, but identity resolution used a fallback. Document the ambiguity and proceed.
+
+**Blocked:** Cannot create or write required paths due to IO/permissions. Report what's broken.
+
+## Preflight Check
+
+Before creating directories, verify you can write to `.runs/`. If IO fails, report the issue and stop.
+
+## Deriving the Run ID
+
+Use the first matching source:
+
+**1. Explicit run-id:** If provided, sanitize and use it. If user requests restart/new/fresh, create `<run-id>-v2` and set `supersedes`.
+
+**2. Issue/PR reference:** If input includes `#123`, `gh-123`, or similar:
+- Check index.json for an existing run matching the issue/PR
+- If found, reuse that run_id
+- If not found, use `gh-N` or `pr-N` as candidate
+
+**3. Branch name:** Read current branch via `git branch --show-current`. Slugify (`feat/auth` -> `feat-auth`). If `.runs/<slug>/` exists, reuse it.
+
+**4. Fallback:** Use `run-<flow>` as base (e.g., `run-plan`). Append `-v2`, `-v3` if needed.
+
+If fallback was used, note the ambiguity in your handoff.
+
+### Sanitization
+- Lowercase letters, numbers, hyphen only
+- Replace spaces/underscores/slashes with `-`
+- Collapse multiple `-`
+- Max 50 chars
+- Record original as alias if changed
+
+## Reuse vs New
+
+**If run_meta.json exists:** Reuse by default (unless restart requested).
+
+**If it does not exist:** Create new.
+
+**If ambiguous:** Reuse the best match and note the ambiguity in your handoff.
+
+## Create Directories
+
 Ensure these exist:
 - `.runs/`
 - `.runs/<run-id>/`

@@ -194,7 +194,7 @@ After writing the receipt and reports, report back with a natural language summa
 **Example (missing artifacts):**
 > test_execution.md is missing -- tests were not run. Route to **test-executor** to run tests before sealing the receipt.
 
-## Handoff Targets (reference)
+## Handoff Targets
 
 - **secrets-sanitizer**: Scans for secrets before publishing. Default after receipt is sealed.
 - **code-implementer**: Fixes implementation issues when forensic mismatches are found.

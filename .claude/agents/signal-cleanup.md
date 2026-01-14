@@ -147,7 +147,7 @@ If critiques are missing, note that verification didn't happen. Status is UNVERI
 
 If optional artifacts (risks, open questions) are missing, note it as a concern and continue.
 
-## Handoff
+Report what you found and what's missing. A partial summary is still valuable.
 
 After writing the receipt and reports, report back with what you found and your recommendation for next steps.
 

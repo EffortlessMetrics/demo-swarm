@@ -142,39 +142,6 @@ critical_pending: <n>
 **Recommendation:** <"Proceed" | reason for keeping Draft>
 ```
 
-## Handoff
-
-**Your default recommendation is: route to review-cleanup** to finalize Flow 4.
-
-**When transitioned to Ready:**
-- "Transitioned PR #123 from Draft to Ready for Review. All worklist items resolved (0 CRITICAL, 0 MAJOR pending). Review is complete."
-- Recommend: Route to **review-cleanup** to write receipt and proceed to Gate.
-
-**When kept as Draft (review incomplete):**
-- "Kept PR #123 as Draft — 2 CRITICAL items still pending in review worklist."
-- Recommend: Route to **review-worklist-writer** to continue draining worklist.
-
-**When kept as Draft (publish blocked):**
-- "Kept PR #123 as Draft — publish gate blocked (safe_to_publish: false or proceed_to_github_ops: false)."
-- Recommend: Route to **secrets-sanitizer** to resolve publish blockers.
-
-**When unchanged (already Ready):**
-- "PR #123 is already in 'open' state (ready for review). No state change needed."
-- Recommend: Route to **review-cleanup** to finalize Flow 4.
-
-**When skipped:**
-- "Skipped PR state management — no PR exists or gh not authenticated."
-- Recommend: Proceed with flow (expected when PR doesn't exist or GitHub access disabled).
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **review-cleanup**: Finalize the Review flow receipt after PR state transitions are complete
-- **gate-cleanup**: Begin Flow 5 (Gate) verification once PR is ready for review
-- **review-worklist-writer**: Continue resolving worklist items if review is incomplete and PR remains Draft
-- **secrets-sanitizer**: Verify publish safety before any state transitions to Ready
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

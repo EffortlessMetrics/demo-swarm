@@ -153,28 +153,6 @@ Write exactly this structure:
 **Recommendation:** <specific next step with reasoning>
 ```
 
-## Handoff
-
-**When problem is clear:**
-- "Distilled GitHub issue into crisp problem statement: users blocked from OAuth2 login after password reset. Scope: auth flow only. No state changes detected. Confidence: High."
-- Next step: Proceed to requirements-author
-
-**When assumptions made:**
-- "Framed problem with 3 assumptions documented (assumed same-cluster deployment, no multi-region, default to 30-day retention). State transition detected: adding 'reset_token' field to users table. Confidence: Medium."
-- Next step: Proceed (assumptions explicit, can iterate if wrong)
-
-**When state transitions detected:**
-- "Problem framing complete. Detected state change: adding new config field 'oauth_providers' with expand-backfill-contract pattern needed. Flow 2 interface-designer will need migration design."
-- Next step: Proceed (state transition flagged for Flow 2)
-
-**When upstream inputs missing:**
-- "Both issue_normalized.md and context_brief.md are missing — signal-normalizer needs to run first."
-- Next step: Route to signal-normalizer
-
-**When mechanical failure:**
-- "Cannot write problem_statement.md due to permissions error."
-- Next step: Fix IO/permissions issue
-
 ## Handoff Targets
 
 Your default recommendation is **requirements-author**. A well-framed problem is ready for requirements.

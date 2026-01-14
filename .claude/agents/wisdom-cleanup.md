@@ -109,6 +109,14 @@ The receipt should answer:
     "notes": "No regressions detected"
   },
 
+  "feedback_actions": {
+    "count": 3,
+    "issues_to_create": 2,
+    "docs_to_update": 1
+  },
+
+  "regressions_found": 0,
+
   "flow_summary": {
     "signal": "complete",
     "plan": "complete",
@@ -217,7 +225,7 @@ If neither `learnings.md` nor `feedback_actions.md` exists, that's a blocker -- 
 
 If prior receipts are missing, note which flows weren't tracked.
 
-## Handoff
+If prior receipts are missing, note which flows weren't tracked.
 
 After writing the receipt and reports, tell the orchestrator what happened:
 

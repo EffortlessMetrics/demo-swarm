@@ -188,35 +188,6 @@ github_repo: <repo>
 **Recommendation:** <"Proceed" | reason for skip>
 ```
 
-## Handoff
-
-**Your default recommendation is: route to pr-status-manager** (to transition Draft to Ready if complete) or **review-cleanup** (to finalize the flow).
-
-**When comment posted successfully:**
-- "Posted PR comment #12345 summarizing review progress: 8 items resolved, 2 pending (1 MAJOR). Used FULL content mode."
-- Recommend: Route to **pr-status-manager** to check if PR should transition to Ready.
-
-**When comment was updated:**
-- "Updated existing PR comment with latest worklist status. All critical items resolved, 3 MINOR items remain."
-- Recommend: Route to **pr-status-manager** or **review-cleanup** depending on worklist state.
-
-**When skipped (no PR):**
-- "Skipped PR comment — no PR exists yet."
-- Recommend: Route to **pr-creator** if PR is needed, otherwise proceed with flow.
-
-**When skipped (auth):**
-- "Skipped PR comment — gh not authenticated or github_ops_allowed is false."
-- Recommend: Proceed with flow (expected when GitHub access is disabled).
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **pr-status-manager**: Transition PR from Draft to Ready for Review once worklist is complete
-- **review-cleanup**: Finalize the Review flow receipt after all PR operations are done
-- **pr-creator**: Create the PR first if no PR exists yet (pr-commenter requires an existing PR)
-- **secrets-sanitizer**: Scan for secrets before any GitHub publishing operations
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

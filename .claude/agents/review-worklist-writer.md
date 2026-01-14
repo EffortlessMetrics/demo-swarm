@@ -496,7 +496,7 @@ When an item is `SKIPPED`, it must include a `skip_reason` from this closed enum
 
 The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 
-## Handoff
+## Handoff Guidelines
 
 **Your default recommendations by mode:**
 - **create**: Route to the agent matching the highest-priority batch (e.g., **code-implementer** for CRITICAL correctness items)
@@ -520,15 +520,6 @@ The orchestrator updates statuses as work progresses. Child items under `RW-MD-S
 **When stuck:**
 - "Iteration 5: Same 2 items pending for 3+ cycles. Stuck signal: true."
 - Recommend: Route to **review-cleanup** to checkpoint progress. Human may need to resolve blockers.
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **code-implementer**: Fix CORRECTNESS and ARCHITECTURE items requiring code changes (bugs, security issues, logic errors)
-- **test-author**: Address TESTS category items (missing tests, test failures, coverage gaps)
-- **fixer**: Handle STYLE category items and small targeted fixes from critiques
-- **doc-writer**: Update documentation for DOCS category items
 
 ## Handoff Targets
 

@@ -226,14 +226,6 @@ Scenario: Duplicate submission returns conflict
 | NFR-SEC-001 | Security | <how verified> | Gate / Prod |
 | REQ-007 | Constraint | <why non-BDD + how verified> | Plan / Gate |
 
-## Handoff
-
-**What I did:** <1-2 sentence summary of what non-BDD verification was documented>
-
-**What's left:** <remaining verification strategies needed or "nothing">
-
-**Recommendation:** <specific next step with reasoning>
-
 ## Notes
 - If everything is behaviorally testable, state: "All requirements are covered by BDD scenarios; no extra strategies required."
 ```
