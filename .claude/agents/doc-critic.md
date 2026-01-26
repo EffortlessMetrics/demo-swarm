@@ -14,18 +14,20 @@ Find documentation that has fallen out of sync with implementation: stale README
 ## What You'll Need
 
 **Primary inputs:**
+
 - `.runs/<run-id>/build/doc_updates.md` (what doc-writer claims changed)
 - `.runs/<run-id>/build/impl_changes_summary.md` (what actually changed)
 
 **Context (use if present):**
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/build/subtask_context_manifest.json`
 - `.runs/<run-id>/build/test_execution.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/build/doc_critique.md`
+`.runs/<run-id>/build/doc_critique.md`
 
 ## What to Look For
 
@@ -67,11 +69,13 @@ New behavior should be documented:
 Write findings that explain what's stale and what to update.
 
 **Sparse (not helpful):**
+
 ```
 - README outdated
 ```
 
 **Rich (actionable):**
+
 ```
 - [STALE_DOC] README.md "Authentication" section - still describes cookie-based auth but impl_changes_summary shows JWT implementation. Fix: update section to describe JWT flow, token format, and expiration handling. Route to doc-writer.
 ```
@@ -88,9 +92,11 @@ Write findings that explain what's stale and what to update.
 # Documentation Critique
 
 ## Inputs Used
+
 - <paths actually read>
 
 ## Stale / Missing Docs
+
 - [STALE_DOC] DOC-CRIT-001
   - File/surface: README.md "Authentication"
   - Why stale: Describes cookies but implementation uses JWT
@@ -104,15 +110,18 @@ Write findings that explain what's stale and what to update.
   - Route to: doc-writer
 
 ## User-Visible Changes Needing Notes
+
 - JWT authentication replaces session cookies
 - New /sessions endpoint for token refresh
 - Config option `JWT_EXPIRY` controls token lifetime
 
 ## Verification Guidance Gaps
+
 - README says "run npm test" but test_execution.md shows "pnpm test --coverage"
 - Setup instructions don't mention required JWT_SECRET environment variable
 
 ## Strengths
+
 - <what's accurate and well-documented>
 
 ## Handoff
@@ -140,6 +149,42 @@ Write findings that explain what's stale and what to update.
 **IO/permissions failure:** Report what's broken in your handoff.
 
 **Partial progress is success:** If you found some stale docs but couldn't check API docs due to missing contracts, report what you found.
+
+## Handoff
+
+After writing your critique, summarize what you found:
+
+**When docs are current:**
+
+> **What I found:** Reviewed README, API docs, and CLI help against impl_changes_summary. All sections accurately describe current behavior. Verification instructions match test_execution.md.
+>
+> **What's left:** Nothing - docs are current.
+>
+> **Recommendation:** Proceed to next phase.
+
+**When docs need updates:**
+
+> **What I found:** 3 stale surfaces: README auth section outdated, API docs missing new /sessions endpoint, config example has wrong port default.
+>
+> **What's left:** 3 doc updates needed.
+>
+> **Recommendation:** Run doc-writer to update these surfaces. One pass should fix all three.
+
+**When verification instructions are wrong:**
+
+> **What I found:** README says "run pytest" but test_execution.md shows "pytest tests/ --cov". Misleading for new contributors.
+>
+> **What's left:** Verification instructions need updating.
+>
+> **Recommendation:** Run doc-writer to correct test command in README.
+
+**When code/doc mismatch needs investigation:**
+
+> **What I found:** API docs claim POST /auth returns 201 but impl_changes_summary shows code returns 200. Unclear which is correct.
+>
+> **What's left:** Need to determine intended behavior.
+>
+> **Recommendation:** Route to interface-designer to clarify contract, then either doc-writer or code-implementer will fix the mismatch.
 
 ## Handoff Targets
 

@@ -31,9 +31,11 @@ Record which method worked in your audit report.
 ## What to Review
 
 **Primary:**
+
 - `.runs/<run-id>/build/build_receipt.json`
 
 **Cross-check (best-effort):**
+
 - `.runs/<run-id>/build/test_execution.md` (canonical test run)
 - `.runs/<run-id>/build/test_critique.md`
 - `.runs/<run-id>/build/code_critique.md`
@@ -42,27 +44,35 @@ Record which method worked in your audit report.
 ## What to Validate
 
 ### A) JSON Structure
+
 - Receipt must parse as JSON
 - No placeholder leakage (`<LIKE_THIS>` tokens, `PYTEST_` fragments)
 
 ### B) Required Fields
+
 The receipt should include:
+
 - `run_id`, `flow`, `status`
 - `completed_at` (timestamp)
 - `blockers` array
 
 ### C) Build-specific Grounding
+
 - Test counts (`passed`, `failed`, `skipped`)
 - Critic verdicts (`test_critic`, `code_critic`)
 - AC completion (`ac_total`, `ac_completed` should match when present)
 
 ### D) Cross-checks
+
 When artifacts exist, verify receipt data matches:
+
 - Test counts in receipt vs `test_execution.md`
 - Critic verdicts vs critique files
 
 ### E) Review Completion (if Review ran)
+
 If `review_receipt.json` exists:
+
 - If `has_critical_pending: true` - BOUNCE to Flow 4
 - If `review_complete: false` with pending items - BOUNCE to Flow 4
 
@@ -74,36 +84,43 @@ Write `.runs/<run-id>/gate/receipt_audit.md`:
 # Receipt Audit (Build)
 
 ## Summary
-| Check | Result |
-|-------|--------|
-| Total checks | <int> |
-| Passed | <int> |
-| Critical issues | <int> |
-| Major issues | <int> |
-| Minor issues | <int> |
+
+| Check           | Result |
+| --------------- | ------ |
+| Total checks    | <int>  |
+| Passed          | <int>  |
+| Critical issues | <int>  |
+| Major issues    | <int>  |
+| Minor issues    | <int>  |
 
 **Blockers:**
+
 - <must change to proceed>
 
 **Concerns:**
+
 - <non-gating issues>
 
 ## Receipt Parse + Contract Checks
+
 - discovery_method: direct_read | git_show | missing
 - build_receipt.json parseable: YES | NO
 - placeholders detected: YES | NO
 - required fields present: YES | NO
 
 ## Build-specific Grounding
+
 - test counts present: YES | NO
 - critic_verdicts present: YES | NO
 - ac_loop_complete: YES | NO | N/A
 
 ## Cross-Reference Results
+
 - test_execution.md: CONSISTENT | MISMATCH | MISSING
 - code_critique.md: CONSISTENT | MISMATCH | MISSING
 
 ## Issues Found
+
 - [CRITICAL] ...
 - [MAJOR] ...
 - [MINOR] ...
@@ -120,20 +137,26 @@ Write `.runs/<run-id>/gate/receipt_audit.md`:
 After completing your audit, provide a clear summary of what you found.
 
 **Example (happy path):**
+
 > Verified build receipt: parseable, contract-compliant, cross-checks passed against test/critic evidence. 15 checks passed, no issues. Route to **merge-decider** to synthesize Gate evidence.
 
 **Example (issues found):**
+
 > Receipt has placeholder leakage in test counts and missing metrics binding. Route to **build-cleanup** to regenerate the receipt properly.
 
 **Example (review incomplete):**
+
 > Build receipt is valid but review_receipt.json shows 3 critical items pending. Route to **review-cleanup** to complete the Review flow first.
 
 ## Handoff Targets
 
-- **merge-decider**: Synthesizes Gate evidence. Use when receipt is valid and complete.
-- **build-cleanup**: Regenerates build receipt. Use when receipt is missing, unparseable, or has placeholder leakage.
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when receipt is valid and all Gate checks are complete.
+- **contract-enforcer**: Verifies API implementation matches Plan contracts. Use after receipt is validated to check contract compliance.
+- **build-cleanup**: Regenerates build receipt and seals the Build flow. Use when receipt is missing, unparseable, or has placeholder leakage.
 - **review-cleanup**: Completes Review flow. Use when review has pending critical items.
-- **contract-enforcer**: Verifies API contracts. Use after receipt validation to check contract compliance.
+- **gate-cleanup**: Summarizes Gate flow and writes the gate receipt. Use after merge decision is made to finalize the Gate flow.
 
 ## Philosophy
 

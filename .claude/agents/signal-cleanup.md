@@ -21,11 +21,11 @@ Compress the Signal flow into a meaningful summary. You're not extracting fields
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/signal/` | The signal flow artifact directory |
-| Write access | `.runs/<run-id>/signal/signal_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                        | What It Contains                    |
+| ------------- | ------------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/signal/`                    | The signal flow artifact directory  |
+| Write access  | `.runs/<run-id>/signal/signal_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                          | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -34,38 +34,95 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `requirements.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `requirements.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Requirements (`requirements.md`)**
+
 - What problem is being solved?
 - How many requirements were defined? How many are functional vs non-functional?
 - Are they clear and testable?
 
 **BDD Scenarios (`features/*.feature`)**
+
 - Were scenarios written? How many?
 - Do they cover the requirements?
 
 **Critiques (`requirements_critique.md`, `bdd_critique.md`)**
+
 - Did critics run? What did they find?
 - Were there critical issues that need attention?
 - Or did things pass cleanly?
 
 **Open Questions (`open_questions.md`)**
+
 - Were questions raised? Are they blocking or informational?
 - Were assumptions documented?
+- Which questions have been resolved? (look for `- A:` resolution markers or `[RESOLVED]` status)
+- Do any questions link to requirements that were created? (e.g., `OQ-SIG-001` resolved by `REQ-001`)
 
 **Risks (`early_risks.md`, `risk_assessment.md`)**
+
 - Were risks identified? How severe?
+
+## Question Resolution Tracking
+
+If `open_questions.md` exists, analyze each question for resolution status:
+
+### Identifying Resolved Questions
+
+A question is considered **resolved** when:
+
+1. **Explicit resolution marker**: The question has `- A:` line with an answer, OR
+2. **Status change**: The question text changed from `[OPEN]` to `[RESOLVED]`, OR
+3. **Requirement linkage**: A requirement in `requirements.md` explicitly addresses the question (look for QID references like "addresses OQ-SIG-001")
+
+### Cross-Checking Against Requirements
+
+For each question, check if it led to a requirement:
+
+1. Search `requirements.md` for the QID (e.g., `OQ-SIG-001`)
+2. Check if the requirement's acceptance criteria addresses the question's concern
+3. Note which requirements address which questions
+
+### Resolution Fields
+
+For resolved questions, capture:
+
+- `qid`: The question identifier (e.g., `OQ-SIG-001`)
+- `resolved_in`: The artifact that resolves it (e.g., `REQ-001`, `Assumption in requirements.md`)
+- `resolution_sha`: The commit SHA where resolution occurred (if determinable, else `null`)
+- `validated_by`: What validates the resolution (e.g., `requirements_critique`, `bdd_critique`, `manual`)
+
+### Counting Questions
+
+Use the demoswarm CLI for mechanical counting:
+
+```bash
+# Count total questions
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '^- QID: OQ-[A-Z]+-[0-9]{3}' \
+  --null-if-missing
+
+# Count resolved questions (with - A: lines)
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '^- A:' \
+  --null-if-missing
+```
+
+**Note:** Resolution count may differ from `- A:` count if questions are resolved via requirement linkage rather than explicit answers.
 
 ## Writing the Receipt
 
 Write `.runs/<run-id>/signal/signal_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - Did Signal produce what it needed to? (requirements, scenarios)
 - Were the outputs reviewed? What did reviewers find?
 - Is this ready for planning, or does it need more work?
@@ -73,6 +130,7 @@ The receipt should answer:
 Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but the purpose is understanding, not field extraction.
 
 **Status determination:**
+
 - `VERIFIED`: Requirements exist AND critics ran AND passed
 - `UNVERIFIED`: Missing required artifacts OR critics found critical issues OR critics didn't run
 - `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
@@ -88,12 +146,29 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
   "summary": "<1-2 sentence description of what Signal produced>",
 
   "artifacts": {
-    "requirements": { "exists": true, "count": 8, "notes": "clear and testable" },
+    "requirements": {
+      "exists": true,
+      "count": 8,
+      "notes": "clear and testable"
+    },
     "nfrs": { "exists": true, "count": 2 },
     "scenarios": { "exists": true, "count": 12 },
     "requirements_critique": { "exists": true, "passed": true },
     "bdd_critique": { "exists": true, "passed": true },
-    "open_questions": { "exists": true, "count": 3 },
+    "open_questions": {
+      "exists": true,
+      "count": 3,
+      "resolved": 1,
+      "unresolved": 2,
+      "resolutions": [
+        {
+          "qid": "OQ-SIG-001",
+          "resolved_in": "REQ-001",
+          "resolution_sha": "<commit or null>",
+          "validated_by": "requirements_critique"
+        }
+      ]
+    },
     "risks": { "exists": true, "critical": 0, "high": 1, "medium": 2, "low": 1 }
   },
 
@@ -111,6 +186,7 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
 Update `.runs/index.json` with status, last_flow, and updated_at for this run.
 
 Use the runs-index skill:
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index ".runs/index.json" \
@@ -122,9 +198,16 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+Follow markdown formatting rules carefully to pass linting:
+- Always have a blank line before AND after headings
+- Always have a blank line before AND after tables
+- Always have a blank line before AND after code blocks
+- Wrap URLs in angle brackets or use Markdown links
+
 **Cleanup Report (`.runs/<run-id>/signal/cleanup_report.md`):**
 
 Write a human-readable summary of what Signal produced. Include:
+
 - What requirements were defined and why they matter
 - What the critics found (or that they passed)
 - Any open questions or risks worth noting
@@ -133,6 +216,7 @@ Write a human-readable summary of what Signal produced. Include:
 **GitHub Report (`.runs/<run-id>/signal/github_report.md`):**
 
 Pre-compose what will be posted to GitHub. Include the idempotency marker:
+
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:signal -->
 ```
@@ -152,8 +236,11 @@ Report what you found and what's missing. A partial summary is still valuable.
 After writing the receipt and reports, report back with what you found and your recommendation for next steps.
 
 Your handoff should explain:
+
 - What artifacts you found and summarized
 - Key counts (requirements, NFRs, scenarios, risks)
+- **Question resolution status**: How many questions total, how many resolved, how many remain open
+- Which questions led to requirements (if any)
 - Whether critics passed or found issues
 - Whether Signal is ready for the next phase or needs more work
 - Your recommendation for which agent should handle this next
@@ -163,6 +250,7 @@ Your handoff should explain:
 Your default recommendation is **secrets-sanitizer**. After cleanup, artifacts need secrets scan before they can be committed.
 
 Other targets when conditions apply:
+
 - **spec-auditor**: Use when cleanup finds missing or incomplete artifacts that need validation.
 - **requirements-author**: Use when cleanup finds requirements are missing or incomplete.
 - **bdd-author**: Use when cleanup finds scenarios are missing or incomplete.

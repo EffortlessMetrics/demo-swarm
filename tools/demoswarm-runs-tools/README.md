@@ -42,19 +42,33 @@ All commands follow the scalar stdout contract:
 - **exit code**: Always 0 (errors expressed via `null` stdout)
 - **stderr**: Optional diagnostics
 
+### Strict Mode
+
+By default, errors return exit code 0 with `null` output. Enable strict mode to return exit code 2 on errors:
+
+```bash
+# Via CLI flag (takes precedence)
+demoswarm --strict count pattern --file "..." --regex "..."
+
+# Via environment variable
+DEMOSWARM_STRICT=1 demoswarm count pattern --file "..." --regex "..."
+```
+
+The `--strict` flag takes precedence over the `DEMOSWARM_STRICT` environment variable.
+
 ## Commands
 
-| Command | Python equivalent |
-|---------|-------------------|
-| `count pattern` | `runs_count_pattern` |
-| `count bdd` | `runs_count_bdd_scenarios` |
-| `ms get` | `runs_extract_machine_field` |
-| `yaml get` | `runs_extract_yaml_block_field` |
-| `yaml count-items` | `runs_count_yaml_block_items` |
-| `inv get` | `runs_extract_inventory_marker` |
-| `line get` | `runs_extract_line_value` |
-| `receipts count` | `runs_count_existing_receipts` |
-| `receipt get` | `runs_read_receipt_field` |
-| `openapi count-paths` | `runs_count_openapi_paths` |
-| `index upsert-status` | `runs_index_upsert_status` |
-| `time now` | `runs_iso_now` |
+| Command               | Python equivalent               |
+| --------------------- | ------------------------------- |
+| `count pattern`       | `runs_count_pattern`            |
+| `count bdd`           | `runs_count_bdd_scenarios`      |
+| `ms get`              | `runs_extract_machine_field`    |
+| `yaml get`            | `runs_extract_yaml_block_field` |
+| `yaml count-items`    | `runs_count_yaml_block_items`   |
+| `inv get`             | `runs_extract_inventory_marker` |
+| `line get`            | `runs_extract_line_value`       |
+| `receipts count`      | `runs_count_existing_receipts`  |
+| `receipt get`         | `runs_read_receipt_field`       |
+| `openapi count-paths` | `runs_count_openapi_paths`      |
+| `index upsert-status` | `runs_index_upsert_status`      |
+| `time now`            | `runs_iso_now`                  |

@@ -18,7 +18,7 @@ This index lists agents organized by role family. For behavior details, see indi
 | [Analytics](#analytics-agents-orange) | Orange | 11 | Analysis, learning, and insights |
 | [Infra](#infra-agents-cyan) | Cyan | 2 | Repo and run infrastructure |
 | [Reporter](#reporter-agents-pink) | Pink | 1 | GitHub posting |
-| **Listed** | | **61** | (see `.claude/agents/` for full set) |
+| **Listed** | | **84** | (see `.claude/agents/` for full set) |
 
 Note: Some agents appear in multiple categories based on their color/role.
 
@@ -129,7 +129,7 @@ Analysis, learning, and operational insights.
 | `fuzz-triager` | Run configured fuzzing (opt-in) and triage crashes into repro/worklist → `build/fuzz_report.md` | 3 |
 | `impact-analyzer` | Map blast radius of the change → `impact_map.json` | 2, 3 |
 | `learning-synthesizer` | Extract actionable lessons from run artifacts → `wisdom/learnings.md` | 7 |
-| `mutation-auditor` | Run bounded mutation testing and produce actionable survivor worklist → `build/mutation_report.md` | 3 |
+| `mutation-auditor` | Run bounded mutation testing and produce actionable survivor worklist → `build/mutation_report.md`. See [Mutation Testing Guide](../how-to/mutation-testing-guide.md) | 3 |
 | `policy-analyst` | Map policy requirements to evidence in the current change → `policy_analysis.md` | 2, 5 |
 | `pr-feedback-harvester` | Read all PR feedback sources (CodeRabbit, GitHub Actions, Dependabot, review comments) → `pr_feedback.md` | 3, 4 |
 | `regression-analyst` | Analyze regressions (tests, coverage, stability) with blame + issue correlation → `wisdom/regression_report.md` | 7 |
@@ -175,6 +175,18 @@ These agents don't fit cleanly into one category or are cross-cutting:
 | `test-executor` | Blue | Execute the configured test suite → `build/test_execution.md` | 3 |
 | `traceability-auditor` | Blue | Read-only coherence + spec traceability audit → `traceability_audit.md` | 5 |
 | `wisdom-cleanup` | Blue | Finalizes Flow 7 by writing `wisdom_receipt.json` and updating `.runs/index.json` | 7 |
+| `evidence-sufficiency-critic` | Orange | Evaluate whether evidence panel is sufficient for risk profile | 5 |
+| `intent-auditor` | Purple | Audit ADR/BDD/REQ coherence and flag missing NFRs, ambiguous acceptance | 2 |
+| `maintainability-analyst` | Blue | Deep analysis of code maintainability (naming, modularity, DRY, coupling) | 7 |
+| `merge-reconciler` | Green | Resolve merge conflicts so repo compiles and tests pass | 3 |
+| `mold-improver` | Blue | Identify codebase patterns that constrain generation quality; propose refactors | 7 |
+| `pattern-analyst` | Purple | Cross-run pattern detection; finds recurring issues across runs | 7 |
+| `process-analyst` | Yellow | Analyze flow execution efficiency (iterations, bounces, stalls) | 7 |
+| `quality-analyst` | Purple | Static analysis of codebase health, complexity, and maintainability | 7 |
+| `review-cockpit-designer` | Green | Design PR cockpit for readability (tables, diagrams, hotspots) | 4 |
+| `signal-quality-analyst` | Orange | Analyze accuracy of feedback sources (CI, bots, humans) | 7 |
+| `solution-analyst` | Green | Verify implementation solves stated problem; trace requirements to code | 7 |
+| `spec-auditor` | Red | Holistic audit of Flow 1 output; verify spec readiness for Plan | 1 |
 
 ---
 
