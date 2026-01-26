@@ -4,21 +4,22 @@
 //! - `scan` writes findings (file/line/type only) to JSON
 //! - `redact` modifies files in-place, prints only status
 
+use std::env;
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
-use clap::builder::PossibleValuesParser;
+use anyhow::{Context, Result, bail};
 use clap::{Args, Subcommand};
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use tempfile::NamedTempFile;
 
+use super::common::write_json_atomic;
 use crate::output::print_scalar;
+use crate::walk::{SkippedItem, walk_dir_excluding_verbose};
 
-/// Secret detection patterns. Each tuple is (regex, type-name).
-const PATTERNS: &[(&str, &str)] = &[
+/// Built-in secret detection patterns. Each tuple is (regex, type-name).
+const BUILTIN_PATTERNS: &[(&str, &str)] = &[
     (r"gh[pousr]_[A-Za-z0-9_]{36,}", "github-token"),
     (r"AKIA[0-9A-Z]{16}", "aws-access-key"),
     (r"sk_live_[0-9a-zA-Z]{24,}", "stripe-key"),
@@ -28,6 +29,32 @@ const PATTERNS: &[(&str, &str)] = &[
         "jwt-token",
     ),
 ];
+
+/// A secret pattern definition for configuration files.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PatternDef {
+    /// The regex pattern to match
+    pub pattern: String,
+    /// The type name for this secret (e.g., "github-token")
+    #[serde(rename = "type")]
+    pub type_name: String,
+}
+
+/// Configuration file format for custom patterns.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PatternsConfig {
+    /// List of custom secret patterns
+    pub patterns: Vec<PatternDef>,
+}
+
+/// A compiled pattern ready for scanning.
+#[derive(Debug)]
+struct CompiledPattern {
+    regex: Regex,
+    type_name: String,
+    #[allow(dead_code)]
+    pattern_str: String,
+}
 
 #[derive(Args, Debug)]
 pub struct SecretsCommand {
@@ -53,6 +80,15 @@ pub struct SecretsScan {
     /// Output file for JSON findings
     #[arg(long)]
     pub output: String,
+
+    /// Path to a JSON or YAML file with additional patterns.
+    /// Patterns are merged with built-in patterns (built-in first, config second).
+    #[arg(long)]
+    pub patterns_file: Option<String>,
+
+    /// Log skipped paths with reasons to stderr
+    #[arg(short, long)]
+    pub verbose: bool,
 }
 
 #[derive(Args, Debug)]
@@ -61,9 +97,15 @@ pub struct SecretsRedact {
     #[arg(long)]
     pub file: String,
 
-    /// Type of secret to redact
-    #[arg(long, value_parser = PossibleValuesParser::new(["github-token", "aws-access-key", "stripe-key", "jwt-token", "private-key"]))]
+    /// Type of secret to redact.
+    /// Use a built-in type or a custom type defined in patterns file.
+    #[arg(long)]
     pub r#type: String,
+
+    /// Path to a JSON or YAML file with additional patterns.
+    /// Required when redacting custom secret types not in built-in list.
+    #[arg(long)]
+    pub patterns_file: Option<String>,
 }
 
 pub fn run(cmd: SecretsCommand) -> Result<()> {
@@ -73,46 +115,219 @@ pub fn run(cmd: SecretsCommand) -> Result<()> {
     }
 }
 
-fn scan(args: &SecretsScan) -> Result<()> {
-    let root = Path::new(&args.path);
-    let out_path = Path::new(&args.output);
+/// Load patterns from a JSON or YAML configuration file.
+/// Returns an error if the file cannot be read or parsed, or if any regex is invalid.
+fn load_patterns_from_file(path: &Path) -> Result<Vec<PatternDef>> {
+    let content = fs::read_to_string(path)
+        .with_context(|| format!("Failed to read patterns file: {}", path.display()))?;
 
-    if !root.exists() {
-        let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [] });
-        write_json_atomic(out_path, &v).map_err(|e| {
-            eprintln!(
-                "Warning: failed to write secrets findings JSON ({}): {e:#}",
-                out_path.display()
-            );
-            e
+    let config: PatternsConfig = if path
+        .extension()
+        .is_some_and(|ext| ext == "yaml" || ext == "yml")
+    {
+        serde_yaml::from_str(&content)
+            .with_context(|| format!("Failed to parse YAML patterns file: {}", path.display()))?
+    } else {
+        // Default to JSON
+        serde_json::from_str(&content)
+            .with_context(|| format!("Failed to parse JSON patterns file: {}", path.display()))?
+    };
+
+    // Validate all regexes at load time
+    for (i, pat) in config.patterns.iter().enumerate() {
+        Regex::new(&pat.pattern).with_context(|| {
+            format!(
+                "Invalid regex in patterns file at index {}: pattern='{}', type='{}'",
+                i, pat.pattern, pat.type_name
+            )
         })?;
-        print_scalar("SCAN_PATH_MISSING");
-        return Ok(());
     }
 
-    // Precompile regexes
-    let compiled: Vec<(Regex, &str)> = PATTERNS
-        .iter()
-        .filter_map(|(pat, typ)| Regex::new(pat).ok().map(|r| (r, *typ)))
-        .collect();
+    Ok(config.patterns)
+}
 
-    let mut findings: Vec<Value> = Vec::new();
+/// Compile patterns into ready-to-use regex objects.
+/// Merges built-in patterns with config patterns (built-in first, config second).
+fn compile_patterns(patterns_file: Option<&str>) -> Result<Vec<CompiledPattern>> {
+    let mut compiled = Vec::new();
 
-    if root.is_file() {
-        scan_one_file(root, &compiled, &mut findings);
-    } else if root.is_dir() {
-        for f in iter_files(root) {
-            scan_one_file(&f, &compiled, &mut findings);
+    // Add built-in patterns first
+    for (pat, typ) in BUILTIN_PATTERNS {
+        if let Ok(re) = Regex::new(pat) {
+            compiled.push(CompiledPattern {
+                regex: re,
+                type_name: typ.to_string(),
+                pattern_str: pat.to_string(),
+            });
         }
     }
+
+    // Add config patterns second (if provided)
+    if let Some(path_str) = patterns_file {
+        let path = Path::new(path_str);
+        let custom_patterns = load_patterns_from_file(path)?;
+
+        for pat in custom_patterns {
+            // Regex already validated in load_patterns_from_file
+            let re = Regex::new(&pat.pattern).expect("regex already validated");
+            compiled.push(CompiledPattern {
+                regex: re,
+                type_name: pat.type_name,
+                pattern_str: pat.pattern,
+            });
+        }
+    }
+
+    Ok(compiled)
+}
+
+/// Find the pattern string for a given type name.
+fn find_pattern_for_type(type_name: &str, patterns_file: Option<&str>) -> Result<Option<String>> {
+    // Check built-in patterns first
+    for (pat, typ) in BUILTIN_PATTERNS {
+        if *typ == type_name {
+            return Ok(Some(pat.to_string()));
+        }
+    }
+
+    // Check custom patterns if file provided
+    if let Some(path_str) = patterns_file {
+        let path = Path::new(path_str);
+        let custom_patterns = load_patterns_from_file(path)?;
+        for pat in custom_patterns {
+            if pat.type_name == type_name {
+                return Ok(Some(pat.pattern));
+            }
+        }
+    }
+
+    Ok(None)
+}
+
+fn scan(args: &SecretsScan) -> Result<()> {
+    let verbose = args.verbose;
+
+    // Validate output path first (before any scanning)
+    let out_path = match validate_output_path_boundary(&args.output) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    // Validate patterns file if provided (security: prevents path traversal)
+    if let Some(pf) = &args.patterns_file {
+        if let Err(e) = validate_path_boundary(pf) {
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    }
+
+    // Validate scan path is within repository boundary (security: prevents path traversal)
+    // Note: We deliberately let validate_path_boundary handle existence check to avoid TOCTOU races
+    let root = match validate_path_boundary(&args.path) {
+        Ok(p) => p,
+        Err(e) => {
+            // Check if it's a "not found" error vs a boundary error
+            // canonicalize() returns NotFound if file missing
+            let is_not_found = e.root_cause().downcast_ref::<std::io::Error>()
+                .map(|io_e| io_e.kind() == std::io::ErrorKind::NotFound)
+                .unwrap_or(false);
+
+            if is_not_found {
+                 let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
+                 write_json_atomic(&out_path, &v).map_err(|write_e| {
+                     eprintln!(
+                         "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
+                         out_path.display()
+                     );
+                     write_e
+                 })?;
+                 print_scalar("SCAN_PATH_MISSING");
+                 return Ok(());
+            }
+
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    // Compile patterns (built-in + custom if provided)
+    let compiled = match compile_patterns(args.patterns_file.as_deref()) {
+        Ok(c) => c,
+        Err(e) => {
+            // Pattern loading/validation failed - report error in output
+            let v = json!({
+                "status": "PATTERN_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATTERN_ERROR");
+            return Ok(());
+        }
+    };
+
+    let mut findings: Vec<Value> = Vec::new();
+    let mut skipped: Vec<SkippedItem> = Vec::new();
+
+    // Use shared walker with exclusions and verbose mode for security scanning
+    let mut walker = walk_dir_excluding_verbose(&root, EXCLUDED_DIRS, verbose);
+
+    // Stream files directly instead of collecting (reduces memory usage)
+    for f in walker.by_ref() {
+        scan_one_file(&f, &compiled, &mut findings, &mut skipped, verbose);
+    }
+
+    // Get skipped items from directory walking
+    skipped.extend(walker.take_skipped_items());
+
+    let skipped_count = skipped.len();
 
     let status = if findings.is_empty() {
         "CLEAN"
     } else {
         "SECRETS_FOUND"
     };
-    let v = json!({ "status": status, "findings": findings });
-    write_json_atomic(out_path, &v).map_err(|e| {
+    let v = json!({ "status": status, "findings": findings, "skipped_count": skipped_count });
+    write_json_atomic(&out_path, &v).map_err(|e| {
         eprintln!(
             "Warning: failed to write secrets findings JSON ({}): {e:#}",
             out_path.display()
@@ -126,56 +341,211 @@ fn scan(args: &SecretsScan) -> Result<()> {
 /// Directory names to exclude from scanning (deterministic fixed list).
 const EXCLUDED_DIRS: &[&str] = &[".git", "target", "node_modules", ".demoswarm"];
 
-/// Walk a directory recursively (no symlink following; best-effort)
-fn iter_files(root: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
-    let mut stack = vec![root.to_path_buf()];
+/// Validate and canonicalize a path, preventing path traversal attacks.
+///
+/// Security: This function prevents path traversal attacks by detecting when
+/// relative paths with ".." components would escape the current working directory.
+///
+/// The validation strategy:
+/// 1. Absolute paths are allowed (explicit, not traversal attacks)
+/// 2. Relative paths are checked for ".." traversal that escapes CWD
+/// 3. Paths that canonicalize to somewhere outside CWD when they started
+///    with relative components are blocked
+///
+/// This allows legitimate use cases (temp directories, absolute paths) while
+/// blocking the attack vector of crafted relative paths like "../../../etc/passwd".
+fn validate_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
 
-    while let Some(dir) = stack.pop() {
-        let rd = match fs::read_dir(&dir) {
-            Ok(r) => r,
-            Err(_) => continue,
-        };
-        for ent in rd.flatten() {
-            let p = ent.path();
-            if p.is_dir() {
-                // Skip excluded directories
-                if let Some(name) = p.file_name().and_then(|n| n.to_str())
-                    && EXCLUDED_DIRS.contains(&name)
-                {
-                    continue;
+    // Canonicalize the input path first
+    let canonical = input_path
+        .canonicalize()
+        .with_context(|| format!("Failed to canonicalize path: {}", path))?;
+
+    // Get CWD
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    // If path is absolute, check if it's within CWD (security: prevent absolute path bypass)
+    // We used to allow absolute paths as "explicit intent", but that allows reading /etc/passwd
+    if input_path.is_absolute() {
+        if !input_path.exists() {
+             // For missing absolute paths, we can't canonicalize them directly to check boundary
+             // But since we require existence for scan paths (checked later or via error), 
+             // we can just fail here or check parent. 
+             // Actually, for scan(), the path must exist.
+             // But validate_path_boundary is called before existence check sometimes?
+             // No, scan() calls it. 
+             // If it doesn't exist, canonicalize fails.
+             // So we try to canonicalize.
+             let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+             if canonical.starts_with(&cwd_canonical) {
+                 return Ok(canonical);
+             }
+             bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+        }
+        
+        let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+        if canonical.starts_with(&cwd_canonical) {
+            return Ok(canonical);
+        }
+         bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+    }
+
+    // For relative paths, check if they escape the CWD
+    // This catches attacks like "../../../etc/passwd"
+
+    // Check if the canonical path is under CWD
+    if canonical.starts_with(&cwd_canonical) {
+        return Ok(canonical);
+    }
+
+    // Relative path escapes CWD - this is the attack pattern
+    bail!(
+        "Relative path '{}' resolves to '{}' which is outside the repository boundary '{}'. \
+         Use an absolute path if you need to access files outside the working directory.",
+        path,
+        canonical.display(),
+        cwd_canonical.display()
+    )
+}
+
+/// Validate path boundary for output files - allows creating new files.
+///
+/// Security: For output paths that don't exist yet, we validate the parent directory.
+/// Like validate_path_boundary, this allows absolute paths but blocks relative
+/// path traversal attacks.
+fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
+
+    // For relative paths, check boundary
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    let mut probe = if input_path.is_absolute() {
+        PathBuf::new()
+    } else {
+        cwd_canonical.clone()
+    };
+    
+    let mut rest = PathBuf::new();
+    let mut parsing_existing = true;
+
+    for component in input_path.components() {
+        if parsing_existing {
+            match component {
+                std::path::Component::Prefix(prefix) => {
+                    probe.push(prefix.as_os_str());
                 }
-                stack.push(p);
-            } else if p.is_file() {
-                out.push(p);
+                std::path::Component::RootDir => {
+                    probe.push(std::path::Component::RootDir.as_os_str());
+                }
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    let next_probe = probe.join("..");
+                    // Resolve ".." via canonicalize to handle symlinks correctly
+                    if next_probe.symlink_metadata().is_ok() {
+                        probe = next_probe.canonicalize().context("Failed to canonicalize ..")?;
+                        // For relative paths, prevent escaping CWD during traversal
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
+                            bail!("Relative output path traverses outside repository boundary");
+                        }
+                    } else {
+                        // ".." failed to resolve? Stop parsing existing.
+                        parsing_existing = false;
+                        bail!("Output path contains '..' in non-existent portion or invalid traversal.");
+                    }
+                }
+                std::path::Component::Normal(c) => {
+                    let next_probe = probe.join(c);
+                    // Check if it exists (use symlink_metadata to catch broken symlinks too)
+                    if next_probe.symlink_metadata().is_ok() {
+                        // It exists. Resolve it.
+                        probe = next_probe.canonicalize().with_context(|| {
+                            format!("Failed to canonicalize path component: {:?}", c)
+                        })?;
+
+                        // For relative paths, prevent escaping CWD
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
+                            bail!(
+                                "Path resolves outside repository boundary: {}",
+                                probe.display()
+                            );
+                        }
+                    } else {
+                        // Component doesn't exist. This is the start of the new path.
+                        parsing_existing = false;
+                        
+                        // Verify we are currently inside CWD before appending new components
+                        if !probe.starts_with(&cwd_canonical) {
+                            bail!("Output path resolves outside repository boundary: {}", probe.display());
+                        }
+                        rest.push(c);
+                    }
+                }
+            }
+        } else {
+            // Parsing non-existent tail
+            match component {
+                std::path::Component::Normal(c) => rest.push(c),
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    bail!("Output path contains '..' in non-existent portion. Create parent directories first to use relative paths.");
+                }
+                _ => {}
             }
         }
     }
 
-    out
+    // Final check
+    if !probe.starts_with(&cwd_canonical) {
+        bail!("Output path resolves outside repository boundary");
+    }
+
+    Ok(probe.join(rest))
 }
 
-fn scan_one_file(path: &Path, patterns: &[(Regex, &str)], findings: &mut Vec<Value>) {
+fn scan_one_file(
+    path: &Path,
+    patterns: &[CompiledPattern],
+    findings: &mut Vec<Value>,
+    skipped: &mut Vec<SkippedItem>,
+    verbose: bool,
+) {
     let bytes = match fs::read(path) {
         Ok(b) => b,
-        Err(_) => return,
+        Err(e) => {
+            let reason = format!("failed to read file: {}", e);
+            if verbose {
+                eprintln!("Warning: skipped {}: {}", path.display(), reason);
+            }
+            skipped.push(SkippedItem {
+                path: path.to_path_buf(),
+                reason,
+            });
+            return;
+        }
     };
 
     // Lossy read; we never emit matched content
     let content = String::from_utf8_lossy(&bytes);
     let lines: Vec<&str> = content.lines().collect();
 
-    for (re, typ) in patterns {
+    for pat in patterns {
         let mut line_nums: Vec<String> = Vec::new();
         for (i, line) in lines.iter().enumerate() {
-            if re.is_match(line) {
+            if pat.regex.is_match(line) {
                 line_nums.push((i + 1).to_string());
             }
         }
         if !line_nums.is_empty() {
             findings.push(json!({
                 "file": path.to_string_lossy(),
-                "type": typ,
+                "type": pat.type_name,
                 "lines": line_nums.join(",")
             }));
         }
@@ -183,13 +553,23 @@ fn scan_one_file(path: &Path, patterns: &[(Regex, &str)], findings: &mut Vec<Val
 }
 
 fn redact(args: &SecretsRedact) -> Result<()> {
-    let path = Path::new(&args.file);
-    if !path.is_file() {
+    let path_raw = Path::new(&args.file);
+    if !path_raw.is_file() {
         print_scalar("FILE_NOT_FOUND");
         return Ok(());
     }
 
-    let bytes = match fs::read(path) {
+    // Validate file path is within repository boundary (security: prevents path traversal)
+    let path = match validate_path_boundary(&args.file) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    let bytes = match fs::read(&path) {
         Ok(b) => b,
         Err(_) => {
             print_scalar("null");
@@ -198,21 +578,31 @@ fn redact(args: &SecretsRedact) -> Result<()> {
     };
     let s = String::from_utf8_lossy(&bytes).to_string();
 
-    let redacted = match args.r#type.as_str() {
-        "github-token" => redact_regex(
-            &s,
-            r"gh[pousr]_[A-Za-z0-9_]{36,}",
-            "[REDACTED:github-token]",
-        ),
-        "aws-access-key" => redact_regex(&s, r"AKIA[0-9A-Z]{16}", "[REDACTED:aws-access-key]"),
-        "stripe-key" => redact_regex(&s, r"sk_live_[0-9a-zA-Z]{24,}", "[REDACTED:stripe-key]"),
-        "jwt-token" => redact_regex(
-            &s,
-            r"eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*",
-            "[REDACTED:jwt-token]",
-        ),
-        "private-key" => redact_private_key_blocks(&s),
-        _ => s, // Should not happen due to value_parser
+    // Find the pattern for the requested type
+    let pattern_opt = match find_pattern_for_type(&args.r#type, args.patterns_file.as_deref()) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Error loading patterns: {e:#}");
+            print_scalar("null");
+            return Ok(());
+        }
+    };
+
+    let redacted = match pattern_opt {
+        Some(pattern) => {
+            let replacement = format!("[REDACTED:{}]", args.r#type);
+            if args.r#type == "private-key" {
+                // Special handling for private key blocks
+                redact_private_key_blocks(&s)
+            } else {
+                redact_regex(&s, &pattern, &replacement)
+            }
+        }
+        None => {
+            eprintln!("Unknown secret type: {}", args.r#type);
+            print_scalar("null");
+            return Ok(());
+        }
     };
 
     if fs::write(path, redacted).is_err() {
@@ -255,26 +645,4 @@ fn redact_private_key_blocks(content: &str) -> String {
     let mut joined = out.join("\n");
     joined.push('\n');
     joined
-}
-
-fn write_json_atomic(path: &Path, v: &Value) -> Result<()> {
-    if let Some(parent) = path.parent()
-        && !parent.as_os_str().is_empty()
-    {
-        fs::create_dir_all(parent)?;
-    }
-
-    // Create a temporary file in the same directory as the target
-    // This ensures they're on the same filesystem for atomic rename
-    let parent_dir = path.parent().unwrap_or_else(|| Path::new("."));
-    let mut tmp = NamedTempFile::new_in(parent_dir)?;
-
-    // Write the JSON content to the temporary file
-    tmp.write_all(format!("{}\n", serde_json::to_string_pretty(v)?).as_bytes())?;
-
-    // Persist the temporary file to the target path
-    // This is an atomic operation that replaces the target if it exists
-    tmp.persist(path)?;
-
-    Ok(())
 }

@@ -41,6 +41,17 @@ This file will be used as the PR description body.
 
 ## Cockpit Structure
 
+### Navigation (accessibility)
+
+Add jump links at the top for keyboard/screen reader users. Include an anchor `top` for "Back to Top" links.
+
+```markdown
+<a id="top"></a>
+**Jump to**: [Summary](#summary) | [Evidence](#evidence-panel) | [Hotspots](#hotspots) | [Recommendation](#recommendation)
+```
+
+Ensure anchor links match the actual section headers.
+
 ### Summary Section (30 seconds to scan)
 
 ```markdown
@@ -48,7 +59,7 @@ This file will be used as the PR description body.
 
 **What**: <one sentence describing the change>
 **Why**: <link to REQ or issue>
-**Risk**: LOW | MEDIUM | HIGH
+**Risk**: 🟢 LOW | 🟡 MEDIUM | 🔴 HIGH
 
 ### Quick Stats
 | Metric | Value |
@@ -57,6 +68,8 @@ This file will be used as the PR description body.
 | Lines +/- | +Y / -Z |
 | Tests | A passed, B failed |
 | Coverage | X% |
+
+[↑ Back to Top](#top)
 ```
 
 ### Evidence Panel (1 minute to scan)
@@ -66,13 +79,15 @@ This file will be used as the PR description body.
 
 | Surface | Status | Evidence |
 |---------|--------|----------|
-| Tests | PASS | [test_execution.md](link) |
-| Critic | 0 MAJOR | [code_critique.md](link) |
+| Tests | ✅ PASS | [test_execution.md](link) |
+| Critic | ✅ 0 MAJOR | [code_critique.md](link) |
 | Coverage | 78% | [coverage_audit.md](link) |
-| Mutation | N/A | Not run (low-risk) |
-| Security | PASS | [security_scan.md](link) |
+| Mutation | ⚪ N/A | Not run (low-risk) |
+| Security | ✅ PASS | [security_scan.md](link) |
 
-**Freshness**: Evidence SHA matches HEAD (FRESH)
+**Freshness**: ✅ SHA matches HEAD (FRESH)
+
+[↑ Back to Top](#top)
 ```
 
 ### Hotspots (where to focus review)
@@ -90,6 +105,8 @@ Review these 3-5 files for spot-checking:
 - Highest complexity delta
 - Security-sensitive paths
 - Most lines changed
+
+[↑ Back to Top](#top)
 ```
 
 ### What's Not Measured
@@ -100,6 +117,8 @@ Review these 3-5 files for spot-checking:
 - **Mutation testing**: Skipped (low-risk change, no critical paths)
 - **Performance testing**: N/A (no NFR-PERF requirements)
 - **Load testing**: Deferred to staging
+
+[↑ Back to Top](#top)
 ```
 
 ### Decision Section
@@ -115,6 +134,8 @@ Review these 3-5 files for spot-checking:
 
 **Open Questions**:
 - None blocking merge
+
+[↑ Back to Top](#top)
 ```
 
 ### Architecture Diagram (when helpful)
@@ -131,6 +152,8 @@ graph LR
 
 *New auth flow added in this PR*
 ```
+
+[↑ Back to Top](#top)
 
 ## Design Principles
 
@@ -161,6 +184,8 @@ Low-risk changes need minimal cockpit. High-risk changes need detailed evidence.
 
 ### 5) Accessibility
 
+- Add jump links at top for keyboard navigation
+- Use status indicators WITH text (✅ PASS, ❌ FAIL, ⚪ N/A)
 - Use tables for scanning
 - Use bullet points, not paragraphs
 - Use Mermaid diagrams sparingly and meaningfully

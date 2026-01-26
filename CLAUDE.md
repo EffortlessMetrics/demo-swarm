@@ -131,6 +131,8 @@ See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audi
 
 ## The Seven Flows
 
+**7 logical flows exposed via 8 slash commands** (7 flow commands + `/customize-pack`).
+
 | Flow | Slash Command | Key Outputs |
 |------|---------------|-------------|
 | 1. Signal | `/flow-1-signal` | `requirements.md`, `features/*.feature`, `signal_receipt.json` |
@@ -140,6 +142,11 @@ See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audi
 | 5. Gate | `/flow-5-gate` | `merge_decision.md`, `gate_receipt.json` |
 | 6. Deploy | `/flow-6-deploy` | `verification_report.md`, `deploy_receipt.json` |
 | 7. Wisdom | `/flow-7-wisdom` | `learnings.md`, `wisdom_receipt.json` |
+
+**Counts clarified:**
+- **7 flows**: The logical SDLC stages (Signal through Wisdom)
+- **8 commands**: 7 flow commands + `/customize-pack` for pack configuration
+- **7 skills**: Mechanical tools invoked by agents (test-runner, auto-linter, etc.)
 
 Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVERIFIED outcomes when upstream artifacts are missing.
 
@@ -209,6 +216,29 @@ See: [docs/explanation/architecture.md](docs/explanation/architecture.md) for de
 
 ---
 
+## Status Semantics
+
+Cleanup agents report completion using these statuses:
+
+| Status           | Meaning                                                                        | When to Use                                      |
+| ---------------- | ------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `VERIFIED`       | Converged. Evidence panel green, evidence fresh, blockers empty.               | Work complete, all checks passed                 |
+| `UNVERIFIED`     | Not converged, but checkpointed. Artifacts written, state captured, resumable. | Missing verification, contradictions, blockers   |
+| `PARTIAL`        | Progress made in unbounded loop. More iterations needed.                       | Flow 4 worklists, iterative refinement only      |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down.           | Environment issues preventing any work           |
+
+**Key distinctions:**
+
+- **UNVERIFIED vs PARTIAL:** Use `PARTIAL` only for flows with unbounded iteration loops (like Flow 4 review worklist processing). For all other incomplete work (missing artifacts, failed checks, contradictions), use `UNVERIFIED`.
+
+- **UNVERIFIED is not failure.** It's honest state that enables routing. A receipt with `UNVERIFIED` and documented gaps is more valuable than blocking.
+
+- **PARTIAL is a checkpoint.** When Flow 4 exhausts context mid-worklist, `PARTIAL` means "real progress made, more to do, rerun to continue."
+
+See: [docs/reference/run-state.md](docs/reference/run-state.md) for receipt schemas.
+
+---
+
 ## Customization
 
 See [docs/how-to/customize-pack.md](docs/how-to/customize-pack.md) for:
@@ -247,21 +277,29 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 | Topic | Location |
 |-------|----------|
 | **Rules (constitution)** | `.claude/rules/*.md` |
+| **Explanation docs** | `docs/explanation/` |
 | The Thesis | `docs/explanation/the-thesis.md` |
-| Architecture & Philosophy | `docs/explanation/` |
 | The Physics | `docs/explanation/the-physics.md` |
+| Laws of the Swarm | `docs/explanation/laws-of-the-swarm.md` |
+| Economics | `docs/explanation/economics.md` |
+| Agent Philosophy | `docs/explanation/agent-philosophy.md` |
+| Architecture | `docs/explanation/architecture.md` |
 | Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
 | Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
 | Org Design as Code | `docs/explanation/org-design-as-code.md` |
 | Reviewing as Audit | `docs/explanation/reviewing-as-audit.md` |
 | Codebase as Mold | `docs/explanation/codebase-as-mold.md` |
-| Control-plane blocks, schemas | `docs/reference/contracts.md` |
+| **Reference docs** | `docs/reference/` |
+| Communication patterns | `docs/reference/contracts.md` |
 | Schemas | `docs/reference/schemas.md` |
 | Run state schemas | `docs/reference/run-state.md` |
 | Stable markers | `docs/reference/stable-markers.md` |
 | Trust model | `docs/reference/trust-model.md` |
 | Calibration | `docs/reference/calibration.md` |
 | CLI commands | `docs/reference/demoswarm-cli.md` |
-| How-to guides | `docs/how-to/` |
-| Flow commands | `.claude/commands/flow-*.md` |
-| Agent prompts | `.claude/agents/*.md` |
+| Glossary | `docs/reference/glossary.md` |
+| Agents index | `docs/reference/agents-index.md` |
+| **How-to guides** | `docs/how-to/` |
+| Example artifacts | `docs/examples/` |
+| **Flow commands** | `.claude/commands/flow-*.md` |
+| **Agent prompts** | `.claude/agents/*.md` |

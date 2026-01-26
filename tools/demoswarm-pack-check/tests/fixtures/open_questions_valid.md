@@ -34,7 +34,8 @@ This is a test fixture with valid QID patterns.
 
 ## Notes
 
-All QIDs above use canonical flow codes:
+All QIDs above use canonical 3-letter flow codes:
+
 - SIG (Signal)
 - PLAN (Plan)
 - BUILD (Build)

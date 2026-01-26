@@ -23,11 +23,11 @@ Compress the Deploy flow into a meaningful summary. Document the deployment outc
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/deploy/` | The deploy flow artifact directory |
-| Write access | `.runs/<run-id>/deploy/deploy_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                        | What It Contains                    |
+| ------------- | ------------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/deploy/`                    | The deploy flow artifact directory  |
+| Write access  | `.runs/<run-id>/deploy/deploy_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                          | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -36,22 +36,25 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `deployment_decision.md`) are not CANNOT_PROCEED -- write a receipt with documented gaps and continue.
+These are mechanical failures. Missing _artifacts_ (like `deployment_decision.md`) are not CANNOT_PROCEED -- write a receipt with documented gaps and continue.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Deployment Decision (`deployment_decision.md`)**
+
 - What was the deployment verdict? STABLE, NOT_DEPLOYED, or BLOCKED_BY_GATE?
 - What was the gate verdict that enabled/blocked deployment?
 - Any failed checks?
 
 **Deployment Log (`deployment_log.md`)**
+
 - What actions were taken?
 - Was the PR merged? Tag created? Release created?
 
 **Verification Report (`verification_report.md`)**
+
 - Did CI pass post-merge?
 - Any smoke test results?
 
@@ -60,14 +63,18 @@ Read these artifacts and understand what they tell you:
 Write `.runs/<run-id>/deploy/deploy_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - Was the code deployed successfully?
 - If not, why not?
 - What's the state of the codebase now?
 
-**Completion states:**
-- **Complete:** Deployment verdict is STABLE and deploy-decider passed. Route to Wisdom.
-- **Incomplete:** Deployment not stable OR verification incomplete. Document what happened.
-- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
+**Status determination:**
+
+- `VERIFIED`: Deployment verdict is STABLE and deploy-decider passed. Route to Wisdom.
+- `UNVERIFIED`: Deployment not stable OR verification incomplete. Document what happened.
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure).
+
+**Note:** Deploy flow does not use `PARTIAL` status. Deploy is a bounded flow with clear completion criteria. Use `UNVERIFIED` for any incomplete state.
 
 ## Receipt Schema
 
@@ -75,6 +82,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "deploy",
+  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
   "summary": "<1-2 sentence description of deployment outcome>",
 
   "deployment_verdict": "STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE",
@@ -102,6 +110,7 @@ The receipt should answer:
 ## Upstream Status Reminder
 
 The code is now safe in `origin/main` (the swarm's mainline). Upstream integration is a separate concern:
+
 - This pack does NOT automatically merge to upstream
 - Human action required for upstream sync
 - Note this in the cleanup report
@@ -124,6 +133,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/deploy/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - What was deployed (or why it wasn't)
 - Actions taken (merge, tag, release)
 - Verification results
@@ -138,14 +148,16 @@ Pre-compose for GitHub posting with idempotency marker.
 Document what you found and what's missing, then proceed.
 
 If `deployment_decision.md` is missing:
+
 - Write a receipt with `deployment_verdict: null` and note the gap
 - This is incomplete data, not a blocker; continue to close the flow
 
 If verification artifacts are missing:
+
 - Note that post-deployment checks weren't run
 - Still write a receipt with what you know
 
-Honest partial work is fine. A receipt that says "deployment decision was never made" is still useful for the audit trail.
+**UNVERIFIED is a valid outcome.** A receipt that says "deployment decision was never made" is still useful for the audit trail.
 
 ## Handoff
 
@@ -153,13 +165,16 @@ After writing the receipt and reports, tell the orchestrator what happened:
 
 **Examples:**
 
-*Deployed successfully:*
+_Deployed successfully:_
+
 > "Summarized Deploy flow. Deployment verdict: STABLE. PR merged, tag v1.2.3 created. Route to **secrets-sanitizer**, then **learning-synthesizer** to extract learnings."
 
-*Not deployed (gate bounce):*
+_Not deployed (gate bounce):_
+
 > "Summarized Deploy flow. Deployment verdict: BLOCKED_BY_GATE due to security findings. Receipt documents the non-deployment. Route to **secrets-sanitizer**, then **learning-synthesizer**. (Fixing the security issues is a separate run.)"
 
-*Incomplete data:*
+_Incomplete data:_
+
 > "Summarized Deploy flow with incomplete evidence. Deployment decision artifact was missing; receipt documents what was available. Route to **secrets-sanitizer**, then **learning-synthesizer**."
 
 Note: Bouncing back to Gate/Build is a new run, not a continuation. This run proceeds to Wisdom to capture learnings even when deployment failed.

@@ -23,11 +23,11 @@ Compress the Review flow into a meaningful summary. You're the forensic auditor 
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/review/` | The review flow artifact directory |
-| Write access | `.runs/<run-id>/review/review_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                        | What It Contains                    |
+| ------------- | ------------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/review/`                    | The review flow artifact directory  |
+| Write access  | `.runs/<run-id>/review/review_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                          | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -36,23 +36,26 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `review_worklist.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `review_worklist.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **PR Feedback (`pr_feedback.md`)**
+
 - What feedback was received from reviewers?
 - How many items? What severity?
 - Any critical issues flagged?
 
 **Review Worklist (`review_worklist.md` or `review_worklist.json`)**
+
 - What items are on the worklist?
 - How many are resolved vs pending?
 - Any critical items still open?
 
 **Review Actions (`review_actions.md`)**
+
 - What actions were taken to address feedback?
 - Were changes made? Tests added?
 
@@ -70,18 +73,25 @@ On mismatch: Add to blockers, set status UNVERIFIED.
 Write `.runs/<run-id>/review/review_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What feedback was received?
 - How much was addressed?
 - Are there critical items still pending?
 - Is this ready for Gate, or does more work remain?
 
-**Completion states:**
-- **Complete:** All critical/major items resolved, worklist complete. Ready for Gate.
-- **Partial:** Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
-- **Incomplete:** Missing worklist OR critical items pending OR no progress made. Document what's missing.
-- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
+**Status determination:**
 
-**PARTIAL is a feature:** Flow 4 has unbounded loops. When context is exhausted mid-worklist, PARTIAL means "real progress made, more to do, rerun to continue."
+- `VERIFIED`: All critical/major items resolved, worklist complete. Ready for Gate.
+- `PARTIAL`: Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
+- `UNVERIFIED`: Missing worklist OR critical items pending OR no progress made. Document what's missing.
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure).
+
+**PARTIAL vs UNVERIFIED:** Flow 4 (Review) is the only flow that uses `PARTIAL`. This status is reserved for unbounded iteration loops where real progress was made but more iterations are needed. Use `UNVERIFIED` when:
+- The worklist is missing entirely
+- Critical items remain unaddressed
+- No progress was made in this iteration
+
+**PARTIAL is a feature:** When context is exhausted mid-worklist, PARTIAL means "real progress made, more to do, rerun to continue." The next iteration picks up where this one left off.
 
 ## Receipt Schema
 
@@ -89,6 +99,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "review",
+  "status": "VERIFIED | PARTIAL | UNVERIFIED | CANNOT_PROCEED",
   "summary": "<1-2 sentence description of review progress>",
 
   "feedback": {
@@ -132,9 +143,73 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+**PR Brief Update (`.runs/<run-id>/review/pr_brief.md`):**
+
+Read the existing PR Brief from `.runs/<run-id>/build/pr_brief.md` and update it with review information. If the build PR brief doesn't exist, create a new one from scratch.
+
+Updates to make:
+1. Add review feedback summary to "Quality events"
+2. Update "Proof" table with review status
+3. Add review-specific hotspots if new issues were found
+
+```markdown
+<!-- PR_BRIEF_START -->
+## PR Brief
+
+### What changed
+
+- <preserve from build brief>
+- <add any changes made during review>
+
+### Why
+
+<preserve from build brief>
+
+### Review map (hotspots)
+
+- <preserve from build brief>
+- <add any new hotspots from review feedback>
+
+### Quality events
+
+- **Interface lock:** <preserve from build>
+- **Boundaries / coupling:** <preserve from build>
+- **Verification depth:** <preserve from build>
+- **Security airbag:** <preserve from build>
+- **Review feedback:** <X> items received, <Y> resolved, <Z> pending (<critical count> critical)
+
+### Proof (measured vs not measured)
+
+| Surface         | Status   | Evidence                                      | Notes                        |
+| --------------- | -------- | --------------------------------------------- | ---------------------------- |
+| Correctness     | measured | `.runs/<run-id>/build/test_execution.md`      | <X> tests pass               |
+| Verification    | partial  | -                                             | mutation not run             |
+| Boundaries      | clean    | `.runs/<run-id>/plan/api_contracts.yaml`      | no API/schema changes        |
+| Maintainability | noted    | `.runs/<run-id>/build/code_critique.md`       | <N> hotspots identified      |
+| Explanation     | partial  | -                                             | updated brief (Flow 4)       |
+| Review          | measured | `.runs/<run-id>/review/review_receipt.json`   | <X>/<Y> items resolved       |
+
+**Not measured:** <explicit list>
+
+### Reproduce
+
+```bash
+# Run tests
+<test command from project>
+```
+
+<!-- PR_BRIEF_END -->
+```
+
+**Derive content from artifacts:**
+- Review feedback summary from `pr_feedback.md` and `review_worklist.md`
+- Resolution status from `review_actions.md`
+- Preserve existing content from build brief where unchanged
+
 **Cleanup Report (`.runs/<run-id>/review/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - What feedback was received
 - How items were addressed
 - What remains (if anything)
@@ -158,13 +233,16 @@ After writing the receipt and reports, tell the orchestrator what happened:
 
 **Examples:**
 
-*Review complete:*
+_Review complete:_
+
 > "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred. Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5."
 
-*Work remains (partial):*
-> "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
+_Work remains (PARTIAL):_
 
-*Blocked on environment:*
+> "Summarized Review flow (PARTIAL). 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
+
+_Blocked on environment:_
+
 > "Cannot write review_receipt.json due to permissions. Need environment fix before retrying."
 
 ## Handoff Targets
@@ -173,5 +251,5 @@ When you complete your work, recommend one of these to the orchestrator:
 
 - **secrets-sanitizer**: Scan artifacts for secrets before committing and pushing review artifacts
 - **gate-cleanup**: Begin Flow 5 (Gate) verification when review is complete and PROCEED is recommended
-- **review-worklist-writer**: Continue draining worklist items when review is incomplete (RERUN recommended)
+- **review-worklist-writer**: Continue draining worklist items when status is PARTIAL (rerun to continue)
 - **repo-operator**: Commit and push review artifacts after cleanup is complete
