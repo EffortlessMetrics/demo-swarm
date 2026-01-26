@@ -1,6 +1,6 @@
 //! Structure checks: required files exist, no duplicates.
 //!
-//! Checks: 1, 2, 6, 9, 10, 15
+//! Checks: 1, 2, 6, 9, 10, 11, 15
 
 use std::collections::HashMap;
 
@@ -35,6 +35,11 @@ pub fn checks() -> Vec<CheckSpec> {
             id: 10,
             title: "Checking CLAUDE.md...",
             run: check_claude_md,
+        },
+        CheckSpec {
+            id: 11,
+            title: "Checking agent skills sections...",
+            run: check_agent_skills_section,
         },
         CheckSpec {
             id: 15,
@@ -174,6 +179,32 @@ fn check_customizer(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
         rep.warn("pack-customizer agent MISSING (optional but recommended)");
     }
 
+    Ok(())
+}
+
+/// Check 11: Agents using demoswarm.sh must have a ## Skills section.
+fn check_agent_skills_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
+    for agent_file in &cx.inv.agent_md_files {
+        let content = cx.ctx.read_utf8(agent_file)?;
+        let rel = cx.ctx.rel(agent_file);
+
+        if content.contains("demoswarm.sh") {
+            // Check for the exact "## Skills" header (tolerant of leading/trailing whitespace)
+            // Use stricter matching to avoid false positives like "## Skillset"
+            let has_skills = content.lines().any(|l| {
+                let trimmed = l.trim();
+                trimmed == "## Skills" || trimmed.starts_with("## Skills ")
+            });
+
+            if has_skills {
+                rep.pass(format!("{rel} uses demoswarm.sh and has Skills section"));
+            } else {
+                rep.fail(format!(
+                    "{rel} uses demoswarm.sh but MISSING '## Skills' section"
+                ));
+            }
+        }
+    }
     Ok(())
 }
 
@@ -331,7 +362,6 @@ name: test-agent
             "flow-4-review.md",
             "flow-5-gate.md",
             "flow-6-deploy.md",
-            "flow-7-wisdom.md",
         ];
 
         for (i, name) in valid_names.iter().enumerate() {
@@ -349,14 +379,14 @@ name: test-agent
     fn test_flow_command_naming_invalid() {
         let invalid_names = [
             "flow-0-zero.md",  // No flow 0
-            "flow-8-extra.md", // No flow 8
+            "flow-7-extra.md", // No flow 7
             "signal.md",       // Missing flow- prefix
             "flow-1.md",       // Missing name after number
             "flow-1-signal",   // Missing .md extension
         ];
 
         for name in invalid_names {
-            let is_valid = (1..=7).any(|i| {
+            let is_valid = (1..=6).any(|i| {
                 let prefix = format!("flow-{}-", i);
                 name.starts_with(&prefix) && name.ends_with(".md")
             });
@@ -581,7 +611,8 @@ name: different-name
     /// Helper: run structure checks and collect diagnostics.
     fn run_structure_checks(repo_root: &std::path::Path) -> (usize, usize, Vec<String>) {
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -589,13 +620,12 @@ name: different-name
         let ctx = Ctx::discover(Some(repo_root.to_path_buf())).unwrap();
         let inv = Inventory::from_ctx(&ctx).unwrap();
         let contracts = Contracts::default();
-        let re = Regexes::compile().unwrap();
 
         let mut rep = Reporter::new(OutputFormat::Json, false, false);
         let check_ctx = super::CheckCtx {
             ctx: &ctx,
             inv: &inv,
-            re: &re,
+            re: &REGEXES,
             c: &contracts,
         };
 

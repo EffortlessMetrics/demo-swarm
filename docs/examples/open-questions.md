@@ -4,7 +4,7 @@ This is an example of an open questions register showing how uncertainty is trac
 
 ---
 
-# Open Questions: feat-session-timeout
+## Open Questions: feat-session-timeout
 
 **Run ID:** feat-session-timeout
 **Updated:** 2024-01-15T14:30:00Z
@@ -48,7 +48,6 @@ Questions where an agent chose a reversible default and documented the reasoning
 - **Decided by:** interface-designer during Flow 2
 - **Evidence:** `src/config/schema.yaml:34` (field definition)
 
-
 ---
 
 ## NEEDS_HUMAN
@@ -82,14 +81,58 @@ Questions requiring human authority — things that genuinely cannot be derived,
 
 ---
 
+## RESOLVED
+
+Questions that have been answered and closed. Resolution tracking enables cleanup agents to report which questions were addressed.
+
+### OQ-SIG-001: Authentication method [RESOLVED]
+
+- **QID:** OQ-SIG-001
+- **Question:** Should authentication use JWT or session cookies? [RESOLVED]
+- **Context:** Initial design needed auth approach decision.
+- **Suggested default:** Use JWT for stateless authentication
+- **Impact if different:** Session cookies require server-side state management
+- **Added:** 2024-01-10T09:00:00Z
+- **A:** JWT approach adopted per security requirements and ADR-005
+- **Resolved in:** requirements.md (REQ-003)
+- **Resolution SHA:** abc123def
+- **Validated by:** requirements_critique
+
+### OQ-PLAN-005: Session expiry notification [RESOLVED]
+
+- **QID:** OQ-PLAN-005
+- **Question:** Should users be notified before session expiry?
+- **Context:** UX consideration for long-running sessions.
+- **Suggested default:** Yes, 5 minutes before expiry
+- **Impact if different:** Users may lose unsaved work without warning
+- **Added:** 2024-01-11T14:00:00Z
+- **A:** 5-minute warning implemented per UX team feedback
+- **Resolved in:** features/session_timeout.feature (Scenario: User receives expiry warning)
+- **Resolution SHA:** def456abc
+- **Validated by:** bdd_critique
+
+---
+
 ## Format Reference
 
-| Status | Meaning | Blocks Flow |
-|--------|---------|-------------|
-| DEFAULTED | Agent chose a reversible default, documented reasoning | No |
-| NEEDS_HUMAN | True ambiguity requiring human decision | Depends on impact |
+| Status      | Meaning                                                | Blocks Flow       |
+| ----------- | ------------------------------------------------------ | ----------------- |
+| DEFAULTED   | Agent chose a reversible default, documented reasoning | No                |
+| NEEDS_HUMAN | True ambiguity requiring human decision                | Depends on impact |
+| RESOLVED    | Question answered with evidence pointer                | No (closed)       |
 
 **Marker format:** `- QID: OQ-<FLOW>-NNN` where FLOW is SIGNAL, PLAN, BUILD, GATE, DEPLOY, or WISDOM.
+
+### Resolution Fields
+
+When a question is resolved, append these fields:
+
+| Field              | Description                                     | Required |
+| ------------------ | ----------------------------------------------- | -------- |
+| `- A:`             | The answer/decision made                        | Yes      |
+| `Resolved in:`     | Artifact where resolution is documented         | Yes      |
+| `Resolution SHA:`  | Git commit where resolution occurred            | Optional |
+| `Validated by:`    | Agent/critic that confirmed resolution          | Optional |
 
 ---
 
