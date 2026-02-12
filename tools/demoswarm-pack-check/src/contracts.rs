@@ -21,6 +21,7 @@ pub mod headings {
 pub struct Contracts {
     pub required_agents: &'static [&'static str],
     pub required_skills: &'static [&'static str],
+    pub workflow_skills: &'static [&'static str],
     pub cleanup_agents: &'static [(&'static str, &'static str)],
     pub critics: &'static [&'static str],
     pub critic_and_verifier_agents: &'static [&'static str],
@@ -47,6 +48,11 @@ pub struct Contracts {
     pub skill_cli_subcommands: &'static [&'static str],
     // OpenQ prefix validation (check 53)
     pub openq_flow_codes: &'static [&'static str],
+    // Receipt schema validation (checks 56-59)
+    #[allow(dead_code)]
+    pub flow_names: &'static [&'static str],
+    pub receipt_statuses: &'static [&'static str],
+    pub receipt_actions: &'static [&'static str],
 }
 
 impl Default for Contracts {
@@ -54,6 +60,7 @@ impl Default for Contracts {
         Self {
             required_agents: REQUIRED_AGENTS,
             required_skills: REQUIRED_SKILLS,
+            workflow_skills: WORKFLOW_SKILLS,
             cleanup_agents: CLEANUP_AGENTS,
             critics: CRITICS,
             critic_and_verifier_agents: CRITIC_AND_VERIFIER_AGENTS,
@@ -73,6 +80,9 @@ impl Default for Contracts {
             gh_body_forbidden_patterns: GH_BODY_FORBIDDEN_PATTERNS,
             skill_cli_subcommands: SKILL_CLI_SUBCOMMANDS,
             openq_flow_codes: OPENQ_FLOW_CODES,
+            flow_names: FLOW_NAMES,
+            receipt_statuses: RECEIPT_STATUSES,
+            receipt_actions: RECEIPT_ACTIONS,
         }
     }
 }
@@ -361,6 +371,24 @@ pub const REQUIRED_SKILLS: &[&str] = &[
     "secrets-tools",
 ];
 
+/// Workflow skills (must exist in `.claude/skills/<name>/SKILL.md`).
+/// Structured methodology guides invoked as slash commands.
+pub const WORKFLOW_SKILLS: &[&str] = &[
+    "commit",
+    "pr-create",
+    "pr-prep",
+    "explore",
+    "debug",
+    "refactor",
+    "review",
+    "fix",
+    "feature",
+    "forensic",
+    "spec-exec",
+    "docs",
+    "changelog",
+];
+
 /// Cleanup agents with their expected receipt filenames.
 pub const CLEANUP_AGENTS: &[(&str, &str)] = &[
     ("signal-cleanup", "signal_receipt.json"),
@@ -523,6 +551,21 @@ pub const OPENQ_FLOW_CODES: &[&str] = &[
     "GATE",   // Gate (Flow 5)
     "DEPLOY", // Deploy (Flow 6)
     "WISDOM", // Wisdom (Flow 7)
+];
+
+/// Canonical flow names (receipt directory names).
+pub const FLOW_NAMES: &[&str] = &[
+    "signal", "plan", "build", "review", "gate", "deploy", "wisdom",
+];
+
+/// Canonical receipt status values.
+pub const RECEIPT_STATUSES: &[&str] = &[
+    "VERIFIED", "UNVERIFIED", "CANNOT_PROCEED", "PARTIAL",
+];
+
+/// Canonical recommended_action values.
+pub const RECEIPT_ACTIONS: &[&str] = &[
+    "PROCEED", "RERUN", "BOUNCE", "FIX_ENV",
 ];
 
 /// Test utilities: cached regex compilation for performance.
