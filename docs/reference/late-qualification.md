@@ -59,12 +59,15 @@ unrelated architecture review.
 
 ## Source and active behavior must not be confused
 
-The first source slice updates the loaded doctrine and orchestration rules.
-It does not silently edit the consumer's Actions or protection. Remaining
-#22 consumers include CLAUDE, README, actual flow-3/4/5/6 commands, repo-operator,
-review/test skills, quality scorecards, examples and customization/distribution.
-They must be reconciled before declaring a coherent new pack release. Do not
-ship these files as proof that downstream CI is already migrated.
+The current source slice updates the loaded doctrine, root navigation,
+orchestration rules, Build/Review/Gate/Deploy commands and repo-operator.
+It does not silently edit Actions or protection. Remaining #22 consumers include
+Signal/Plan/Wisdom details, other specialist and ad-hoc skill instructions,
+quality scorecards, examples and customization/distribution. They remain
+subordinate to the current lifecycle contract; reconcile their actual callers
+before claiming a coherent new pack release or multi-harness adoption.
+Historical helper schemas are unchanged. A new qualification observation must
+not be written as a legacy MERGE verdict merely to satisfy an old consumer.
 
 When a consumer still has the old route, inspect and report that fact. Keep
 its actual protected proof satisfiable until the replacement request, result,
