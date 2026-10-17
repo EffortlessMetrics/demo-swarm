@@ -31,6 +31,11 @@ fixed roster. The root joins conclusions, not votes.
 
 Harvest current human, bot and tool feedback through existing adapters when
 useful. Preserve original finding/thread identities and contradictory evidence.
+Read every available page of reviews, discussion and inline comments, and native
+thread resolution state. Unknown/truncated feedback stays incomplete rather than
+clean. A MAJOR finding can require immediate repair; Build does not postpone it
+merely because it is below CRITICAL.
+
 Cluster for efficient repair without collapsing different causes or losing
 attribution. Distinguish implementation defects, weak proof, instrument failure,
 unsupported claims and suggestions.
@@ -57,8 +62,20 @@ material findings and their dispositions. Use existing review/worklist schemas
 where needed, but do not invent counters or replace GitHub's live state with
 tracked files. The PR summary is navigation, not a substitute for source review.
 
-Reply in the original threads when appropriate. Re-fetch after repairs to catch
-new material feedback. Do not wait in an idle polling worker for a bot; preserve
+For each original thread, distinguish verified repair/refutation from GitHub's
+conversation state. After checking source and affected proof, the authorized
+owner replies with the disposition and evidence, then resolves the exact native
+thread when the disposition and repository policy permit. Use the thread node
+ID, not the numeric review-comment ID. Read back the resolution; a reply, local
+RESOLVED item, changed line or outdated flag does not perform that operation.
+Never bulk-resolve unread threads or resolve only to make a gate green. Keep a
+valid outstanding or unaccepted deferred finding open. Grouping findings never
+resolves every child automatically. Lack of resolution permission is a named
+capability blocker, not a reason to request broader credentials or repeat writes.
+
+Re-fetch native threads and reviews after repairs and before final integration
+to catch new material feedback. This decision may be performed by the existing
+owning lead; it does not require a new agent or routine human approval. Do not wait in an idle polling worker for a bot; preserve
 its native operation and wake condition when that is the actual dependency.
 Do independent useful work or checkpoint.
 
@@ -71,10 +88,14 @@ flow's current lifecycle or grant additional mutation authority.
 
 When substantive review is current, required local proof is sufficient and
 material findings have evidence-backed dispositions, continue to
-`/flow-5-gate` for an explicit qualification request. Record independent CI as
+`/flow-5-gate` for selection and an explicit qualification request. Several
+reviewed alternatives do not each require expensive CI; the root selects the
+candidate intended to land for the objective first. Record independent CI as
 NotRun when it has not run. Do not toggle Draft/Ready to start it.
 
 Readiness metadata may be changed only for its real review purpose under the
 installed safe route; it is neither qualification nor merge authorization.
 New findings return to the affected Build/Plan question. A blocked instrument
 or genuinely unresolved owner decision retains a precise next action.
+
+Behavioral acceptance cases: [review continuation](../../docs/reference/review-continuation-cases.md).
