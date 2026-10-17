@@ -16,6 +16,15 @@ original local evidence and the repository's implemented qualification adapter.
 Resolve missing or stale source review first. Do not require the qualification
 result that this request is intended to produce as a prerequisite to request it.
 
+Select the candidate actually intended to land for this objective before
+allocating expensive qualification. Alternative Drafts may be implemented and
+reviewed cheaply; technical eligibility is not a request to qualify each one.
+A later switch of candidate needs its own current request and applicable proof,
+not its sibling's green status. Selection is per objective, not a repository-wide
+one-PR limit: independent objectives may qualify concurrently within real
+capacity and integration constraints. Use existing issue/PR ownership records,
+not another selection database.
+
 Select applicable mandatory obligations and justified risk-directed proof through
 the existing product planner. Each obligation must execute, reuse admissible
 original evidence, be demonstrably inapplicable, or remain blocked/not proven.
@@ -43,9 +52,18 @@ complete result. On duplicate delivery or lost response, observe the existing
 operation before deciding whether another attempt is justified. Preserve useful
 in-flight work and original evidence; do not automatically cancel it on a push.
 
-A real remote wait names the operation and wake condition. Do useful independent
-work or return an in-flight checkpoint rather than occupy an idle polling
-worker. A child finishing does not mean the selected proof portfolio finished.
+The same useful owning lead normally carries the request through the ordinary
+CI wait, complete result inspection, Flow 6's separate final judgment, authorized
+protected merge and landed readback. Different decisions do not require different
+agents or a routine human approval. Do not stop at green or hand off merely
+because a named flow ended.
+
+Use supported wait/event handling or bounded checks without tight polling;
+useful independent work may proceed while retaining candidate ownership and warm
+context. An actual interruption, unusually long queue or exhausted session gets
+an exact request/run/attempt checkpoint and next wake condition. That recovery
+path is not the default for a normal in-window wait. A child finishing does not
+mean the selected proof portfolio finished.
 
 Normal complete active qualification targets <=20 minutes including required
 setup, children and finalization. Measure request/queue latency separately and
