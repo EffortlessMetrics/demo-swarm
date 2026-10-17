@@ -43,14 +43,36 @@ feedback and repair. Enter existing coherent work at the earliest missing or
 stale useful judgment; do not reconstruct an entire pipeline to satisfy its
 historical sequence.
 
-Ask separately where relevant:
+### Shared questions
 
-- Is this the right problem, and does an existing owner already solve it?
-- What realistic wrong behavior would pass these tests?
-- Are the tests complete enough and inexpensive enough to run repeatedly?
-- Can the implementation be simpler or better placed?
-- Do comments, docs, configuration, compatibility and the actual user journey agree?
-- Does the cumulative candidate still fit the product and current repository?
+Every agent should understand these questions. A focused assignment selects the
+next useful work; it does not give one permanent specialist exclusive knowledge
+of a stage. Apply the relevant questions to the actual claim:
+
+- Does the premise or specification solve the user's problem? Which assumptions
+  need challenge, and does an existing owner or capability already address it?
+- Does the test reach the intended consumer with a meaningful stimulus and
+  oracle? What realistic wrong implementation could still pass it?
+- Does the proof cover the claim's required behavior, error paths, boundaries and
+  compatibility? Which relevant behavior remains untested or unexplained?
+- Can the tests give the same discriminating evidence with less setup, build,
+  fixture or execution cost? Keep completeness and test efficiency separate.
+- Can the design be simpler, more modular or better placed at an existing owner?
+  Which abstraction, duplicate authority or unnecessary feature can be removed?
+- Is runtime behavior efficient for the actual workload, including latency,
+  memory, I/O and resource use where relevant? What measurement supports that?
+- Is development efficient: useful feedback, builds, review, repair and recovery?
+  Which repeated work can be avoided without concealing an obligation?
+- Do comments, docs, configuration, supported entry paths and the user journey
+  agree with the implementation and its limitations?
+- Does the cumulative candidate still fit the product and current repository,
+  including interactions with work that landed while this candidate was open?
+
+These are shared reasoning criteria, not a form every task must fill out. State
+the uncertainty that matters, choose work that can resolve it, and return to a
+question when a finding changes its premise. The operating and agent contracts
+carry these criteria into assignments; do not assume a child received rules or
+context that its harness did not supply.
 
 Questions may recur. They are not permission gates, a fixed agent roster or a
 prescribed number of passes. Independence comes from changed evidence, oracle,
