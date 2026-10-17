@@ -72,7 +72,10 @@ Those effects have separate owners, authorization and evidence requirements.
 
 ## Outputs
 
-Retain existing helper compatibility when consumed, including:
+Retain existing helper compatibility when consumed, including the result heading
+that existing readers locate. These are observations, not new permissions.
+
+## Repo Operator Result
 
 ```text
 operation: checkpoint | build | stage | merge
