@@ -1,319 +1,135 @@
-# Doctrine
-
-> The immutable beliefs that shape everything else.
-
----
-
-## The Thesis
-
-**Humans author intent. Swarms manufacture verified change. Reviewers audit the cockpit, not the diff.**
-
-This is not "AI helps you code faster." This is an industrial control loop that makes stochastic generation safe by producing **telemetry you can trust**.
-
----
-
-## The Assembly Moment
-
-We've reached a transition like 1970s (binary → assembly) or 1990s (assembly → C).
-
-**Now:** Stop writing code. Implementation languages are intermediate bytecode.
-
-The bottleneck has moved. Code generation is solved. **Trust is the bottleneck.** The system exists to manufacture trust, not code.
-
-Everything we learned about software engineering still applies—tests, reviews, architecture, CI/CD. We just have compute that can run the mechanical parts. Your starting point is no longer a blank file. It's a review-ready artifact that's already been through the SDLC.
-
----
-
-## The New Roles
-
-| Role          | What They Do                                           |
-| ------------- | ------------------------------------------------------ |
-| **Architect** | Write intent (specs, ADRs, BDD). Define contracts.     |
-| **PM**        | Make judgment calls. Handle NEEDS_HUMAN. Decide scope. |
-| **Auditor**   | Review evidence. Spot-check hotspots. Authorize merge. |
-
-What humans don't do: write implementation code, debug syntax, review diffs line-by-line.
-
----
-
-## The Vibe
-
-**We are not Silicon Valley Hype. We are Rust Belt Industrialism.**
-
-- Cold, industrial, deterministic, high-trust
-- We don't "chat" with the bot—we operate the refinery
-- Not "Copilots" (assistants)—**AgOps** (infrastructure)
-
-See [the-thesis.md](../../docs/explanation/the-thesis.md) for the full story.
-
----
-
-## The Triangle (No Compromises)
-
-Three things matter. Optimize all three together:
-
-1. **Minimize human review time** per PR
-2. **Maximize PR quality + maintainability**
-3. **Maximize wall-clock velocity**
-
-The ratio that matters: **Quality per DevLT** (PR quality achieved per minute of developer attention).
-
-Compute is cheap. Architect attention is expensive. Trade accordingly.
-
----
-
-## The Manufacturing Thesis
-
-**The factory produces trust, not code.**
-
-Code is a byproduct. The actual product is a PR where the review surface is self-evidently trustworthy. The verification panel answers every question the reviewer would have asked.
-
-| Traditional             | Swarm               |
-| ----------------------- | ------------------- |
-| Write code              | Define intent       |
-| Hope it's correct       | Generate candidates |
-| Review catches problems | Verify exhaustively |
-|                         | Ship what passes    |
-
-The verification IS the product.
-
----
-
-## Trust AND Verify
-
-High autonomy is enabled by high verification. Not "trust later." Not "verify forever then trust." **Both, always.**
-
-The system earns trust through evidence, not assertions. An agent's claim does not override an exit code. A receipt without pointers is hope, not proof.
-
----
-
-## Intent Starts. Evidence Decides.
-
-The causal flow starts from intent:
-
-**Intent → Candidates → Evidence → Decision → Narrative**
-
-When sources conflict, evidence arbitrates:
-
-**Tool outputs → Derived facts → Intent → Implementation → Narrative**
-
-These are two different orderings for two different purposes:
-
-- The first is **how work moves** (forward flow)
-- The second is **how disagreements resolve** (arbitration)
-
-Intent artifacts (REQ/BDD/ADR) are the primary change surface. We still edit code when needed, but the system's leverage comes from making intent + evidence the default review surface.
-
----
-
-## Debugging Is Allowed
-
-"Rerun" is a tool, not a virtue.
-
-Choose the cheapest path to trust:
-
-1. **Tool-output grounded debugging** — compiler errors, failing tests, diff-based blame
-2. **Intent edits** — if the bug is spec/contract-level
-3. **Surgical code edits** — if it's implementation-level
-
-Agents can and should debug. The goal is trust, not purity.
-
----
-
-## Completion Semantics
-
-"Done" is a mechanical state, not a feeling.
-
-| Status           | Meaning                                                                        |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `VERIFIED`       | Converged. Evidence panel green, evidence fresh, blockers empty.               |
-| `UNVERIFIED`     | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
-| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down.           |
-
-**UNVERIFIED is not failure. It's honest state.**
-
-### Flows Run to Completion
-
-Flows never stop mid-execution. They run to the boundary and checkpoint.
-
-- **VERIFIED** = Evidence says done (panel green, evidence fresh, blockers empty)
-- **UNVERIFIED** = External constraint hit (artifacts written, state captured, resumable)
-
-The only external constraints (all rare):
-
-| Constraint    | What It Means                                   | How Rare                           |
-| ------------- | ----------------------------------------------- | ---------------------------------- |
-| **Budget**    | Tokens, time, or CI minutes exhausted           | Occasional                         |
-| **Access**    | Tooling broken, permissions missing, infra down | Rare                               |
-| **Authority** | Non-derivable decision with no safe default     | Very rare (prefer DEFAULTED + log) |
-
-**Everything else is routing.** Stagnation → route differently. Oscillation → break the cycle. Failure → route to fixer. "Blocked" is almost always just "route to the right agent."
-
-Counts are not exit criteria. "3 tries" means run it again. Stagnation triggers rerouting, not stopping.
-
----
-
-## The Physics
-
-These are non-negotiable invariants. Violating them breaks the system.
-
-1. **Mechanical Truth** — Trust tool outputs over agent narratives. Exit codes and counts, not claims.
-2. **Schema Gravity** — The flow structure pulls outputs into alignment. Each step has expectations that constrain the next.
-3. **Shadow Fork** — .runs/ is a sandbox. Nothing graduates until gate passes.
-4. **Throughput Inversion** — Verification arbitrage: burn cheap compute to buy back expensive attention.
-5. **Adversarial Pressure** — Single agents lie to please. Two agents fighting surfaces truth.
-6. **Scoped Context** — Short focused threads cost less. Pay only for relevant tokens.
-
-See [the-physics.md](../../docs/explanation/the-physics.md) for full explanations.
-
----
-
-## Handcuffs vs Errors
-
-In the work plane, **handcuffs are worse than errors**.
-
-| Mode          | What Happens                                                  |
-| ------------- | ------------------------------------------------------------- |
-| **Errors**    | Route to fixers, continue, learn                              |
-| **Handcuffs** | Stop-and-ask mid-flow, rigid routing schemas, kill throughput |
-
-Errors are expected. The pipeline handles them. Handcuffs prevent the pipeline from running.
-
----
-
-## Smooth is Fast
-
-**Don't stop mid-flow to ask permission. Let the swarm run to completion.**
-
-- Don't ask "is this plan okay?" — run the plan, gate catches problems
-- Don't ask "should I proceed?" — proceed, evidence shows if it worked
-- Don't wait for approval between steps — flow boundaries are where humans engage
-
-Velocity comes from smooth execution, not from being clever. Long, simple chains of atomic operations beat short, complex ones.
-
----
-
-## The Flywheel
-
-**Machine workflows are code. Human workflows are not.**
-
-Every hour of work moved from human to machine is an hour we can optimize:
-
-- Profile it
-- Parallelize it
-- Cache it
-- Make it faster
-
-Human workflows resist optimization. Machine workflows are just code.
-
-```
-Today: 8 hrs machine time
-Optimize critic loop → 6 hrs
-Parallelize testing → 4 hrs
-Smarter caching → 2 hrs
-```
-
-The more we push to machine, the faster everything gets. Human time doesn't compress like that.
-
----
-
-## What Changes at Scale
-
-When trust is manufactured (not hoped for), the shape of work changes:
-
-| Old Constraint                           | New Reality                                  |
-| ---------------------------------------- | -------------------------------------------- |
-| PRs must be small to be reviewable       | PR size is independent of review time        |
-| Large changes require many review cycles | Evidence quality determines review time      |
-| Refactors are risky and avoided          | Refactors are verified like any other change |
-| "Too big to review" is a blocker         | Review the cockpit, spot-check hotspots      |
-
-This isn't about doing more. It's about the relationship between change size and review burden no longer being linear.
-
----
-
-## The Skill Shift
-
-Implementation code is generated output. Your attention shifts:
-
-| Less                                | More                         |
-| ----------------------------------- | ---------------------------- |
-| Reading implementation line-by-line | Reading evidence panels      |
-| Debugging syntax                    | Refining intent              |
-| Code ownership ("my code")          | Intent ownership ("my spec") |
-| Reviewing diffs                     | Reviewing cockpits           |
-
-**No one "wrote" the implementation.** Just like no one wrote the assembly under your C. The work you take pride in is the spec, the architecture, the decisions—not the syntax.
-
-**The codebase is a mold.** Existing patterns shape new generation via schema gravity. Good codebase = good generations. Refactoring the mold improves all future output.
-
----
-
-## The Stochastic Compiler
-
-The LLM is not a chatbot. It is a **stochastic compiler**.
-
-- **Input:** Natural language specs (BDD, requirements, ADRs)
-- **Output:** Implementation code (candidate artifacts)
-- **Process:** Non-deterministic, iterative, refinable
-
-Like a traditional compiler, but:
-
-- Probabilistic (same input may vary)
-- Fallible (output needs verification)
-- Cheap to re-run (iteration is the normal path)
-
-**Trust the pipeline, not the generation.** Individual generations are unreliable. Generate → Verify → Critique → Refine is reliable.
-
----
-
-## Anti-Austerity (The Laziness Tax Is Gone)
-
-We always knew we should write comprehensive tests, document everything, run mutation testing. We didn't because human time was expensive. We cut corners out of economic rationality.
-
-Now the cost is immaterial. **Do it right.**
-
-Spend compute on:
-
-- **Verification depth** (mutation testing, multiple critic passes)
-- **Documentation** (generated alongside code, always current)
-- **Evidence quality** (clear receipts, comprehensive coverage)
-- **Review surfaces** (better cockpit, clearer hotspots)
-
-The discipline was always correct. We just couldn't afford it. Now we can.
-
-The flywheel: every hour of work moved from human to machine becomes an hour we can make faster tomorrow. Human workflows are hard to optimize. Machine workflows are just code.
-
----
-
-## The Lineage
-
-This approach draws from:
-
-- **Lean manufacturing / Toyota** — Small stations, sensors, throughput + quality together
-- **DevOps** — Automation, observability, tight feedback loops
-- **Teal / modern org design** — Autonomy inside clear boundaries; responsibility is local
-- **Audit/controls mindset** — Receipts, traceability, evidence hierarchy
-- **UX + accessibility engineering** — The PR cockpit is a UI; humans should understand quickly
-- **Open source sensibility** — Make it teachable, portable, and kind to the next contributor
-
----
-
-## The Laws Are Physics
-
-The eleven laws in `docs/explanation/laws-of-the-swarm.md` are not preferences. They are the physics that makes the system work. Violating them breaks the system in predictable ways.
-
-When proposing a change, ask:
-
-- Does this violate any law?
-- Does this support any law?
-- Is the violation justified and documented?
-
----
-
-## See Also
-
-- [laws-of-the-swarm.md](../../docs/explanation/laws-of-the-swarm.md) — The eleven immutable rules
-- [economics.md](../../docs/explanation/economics.md) — The math that makes this work
-- [stochastic-compiler.md](../../docs/explanation/stochastic-compiler.md) — The compiler mental model
-- [why-ops-first.md](../../docs/explanation/why-ops-first.md) — Default-allow philosophy
+# Engineering operating principles
+
+These are revisable operating decisions, not claims that the workflow cannot
+fail. [The late-qualification migration](../../docs/reference/late-qualification.md)
+distinguishes the intended method from the currently installed execution route.
+
+## Intent and evidence
+
+The maintainer's accepted direction governs what the work should become.
+Current source, real behavior and evidence govern what we can claim. A failing
+test may refute an implementation; it does not silently select a different
+product. Conversely, an accepted specification does not prove the code works.
+
+Keep observations, inference, proposals, accepted decisions, current outcomes and
+superseded conclusions distinguishable. Preserve material contrary evidence and
+why a decision changed. Summaries of one observation are still one source.
+
+Agents can question an open plan. Once the maintainer rules, implement that
+objective unless new evidence changes a relevant factual or safety boundary.
+Do not replace it with stricter ceremony merely because the ceremony is easier
+to check.
+
+## Useful software is the outcome
+
+Optimize useful accepted changes, quality, maintainability, feedback latency,
+actual compute/cash cost and operator effort together. Receipts make work
+inspectable; receipts are not a substitute for the working product.
+
+A test can pass without rejecting the defect. A tool can exit zero without
+executing its intended subjects. A review can be posted without covering the
+claim. A merge can succeed without delivering an installed product. Trace the
+actual consumer and evidence before treating any of those as completion.
+
+Humans may design, implement, debug, inspect diffs or review evidence as useful.
+The method does not prohibit work because of a role name. A concise PR summary
+helps navigation; substantive reviewers still inspect load-bearing code,
+consumer behavior and falsifiers rather than treating the summary as authority.
+
+## Warm development and differentiated review
+
+Keep useful repository, build and model context across implementation, review
+feedback and repair. Enter existing coherent work at the earliest missing or
+stale useful judgment; do not reconstruct an entire pipeline to satisfy its
+historical sequence.
+
+Ask separately where relevant:
+
+- Is this the right problem, and does an existing owner already solve it?
+- What realistic wrong behavior would pass these tests?
+- Are the tests complete enough and inexpensive enough to run repeatedly?
+- Can the implementation be simpler or better placed?
+- Do comments, docs, configuration, compatibility and the actual user journey agree?
+- Does the cumulative candidate still fit the product and current repository?
+
+Questions may recur. They are not permission gates, a fixed agent roster or a
+prescribed number of passes. Independence comes from changed evidence, oracle,
+method, environment, assumptions or attention, not merely a different name.
+A prior clean review never forbids a later substantive review. Resolve valid
+findings or retain an evidence-backed bounded disposition; reject incorrect
+findings with evidence. Stop redundant work by its diminishing useful value,
+not by either a fixed retry count or an obligation to keep calling models.
+
+## Ownership and recoverability
+
+Keep one mutation writer per candidate. Reading, research and review require no
+reservation. Different coherent claims can advance concurrently; coordinate
+actual duplicates, dependencies, shared destructive effects and integration
+interactions, not merely nearby filenames.
+
+The accountable root retains the integrated outcome and next useful action.
+It may perform bounded work itself or delegate when another context helps.
+A child returning or stopping does not complete the parent goal. A real remote
+wait names its actual operation and wake event; do other useful work or release
+attention instead of retaining an idle polling worker.
+
+GitHub owns current issues, candidates, reviews, checks and merge facts. Git
+owns versioned source, specifications, decisions and instructions. Native
+workers own unpublished work, processes and worktrees. Local run artifacts
+retain evidence; they do not become an alternative repository-state authority.
+
+## Publication, qualification and merge are distinct
+
+The target method keeps commits, pushes, Draft publication and Ready cheap.
+Their purpose is sharing work and evidence. Ready is not the CI launch button.
+After substantive review and warm proof converge, explicitly request
+qualification for the current candidate and evidence. A retained request label
+on an earlier head does not authorize a successor.
+
+Select mandatory obligations and justified risk-directed proof before expensive
+allocation. Reuse admissible evidence under its actual subject and provenance;
+unknown applicability is not a no-op. CI run duration normally stays within
+20 minutes including required setup, selected children and finalization.
+Request/queue latency and shifted local work remain separate measurements.
+
+Qualification produces evidence, not merge permission. Afterwards make a fresh
+product, findings and current-repository/integration judgment, then use the
+actually authorized protected expected-head merge. No routine merge queue or
+auto-merge is part of this target. Do not replay full CI merely because the PR
+merged. The separate ordinary main-health policy requires both one hour and
+ten merges since its baseline; prioritize genuine repairs and contain affected
+work while demonstrably independent work continues.
+
+This instruction file does not install that route, alter protection, publish a
+required check or authorize a release. During migration, inspect the actual
+consumer configuration and preserve its controls. Missing request/publisher
+capability is an explicit implementation gap, not permission to invent a
+command, bypass checks or claim a cutover occurred.
+
+## Evidence and completion
+
+Capture actual tested bytes, commands, selected/executed subjects, environment,
+results and accessible original evidence. HEAD alone cannot identify dirty or
+staged inputs. A digest binds bytes, not their producer or successful execution.
+Reconcile those inputs with the published candidate before reuse.
+
+Review is cumulative and semantic. A new SHA does not erase unaffected evidence;
+a new material finding can withdraw readiness without any code change. Refresh
+the affected questions and proof. Keep candidate, integration and actual landed
+subjects distinct. Expected-head checking does not atomically freeze the base.
+
+Completion depends on the selected claim and remaining obligations, not a green
+panel alone. Existing status words remain reports with scope:
+
+- `VERIFIED`: the named claim has supporting evidence and its required outcomes;
+  not a universal correctness, release or merge authorization.
+- `UNVERIFIED`: incomplete work/evidence is preserved with a precise next action
+  or wake condition. A remote wait is not necessarily a mechanical failure.
+- `CANNOT_PROCEED`: a specific unavailable tool, permission, infrastructure or
+  necessary decision prevents the next relevant action; keep independent work moving.
+
+Product learning, change delivery, release/installed delivery and improvement of
+the operating method are separate loops. Record which actually completed.
+Observe which instruction version the harness loaded, what information it saw,
+what it did and which correction helped. Valid documents and graphs alone do
+not prove that agents followed them.

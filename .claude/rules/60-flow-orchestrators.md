@@ -3,284 +3,149 @@ globs:
   - .claude/commands/flow-*.md
 ---
 
-# Flow Orchestrators
+# Flow orchestration
 
-> How orchestrators scope, route, and checkpoint.
+Flow names organize work. They do not require a new agent, fixed roster,
+permission round-trip or clean-slate context at each boundary.
 
----
+The accountable root owns the intended result, current claim, writer, joined
+evidence, findings, next action and final judgment. Delegate substantial
+research, mutation or review when another context improves the work; perform
+bounded work locally when that is the useful route. Do not turn one root into
+an obligatory leaf-worker bottleneck or a permanent subordinate hierarchy.
 
-## The Orchestrator Role
+## Enter from current evidence
 
-Flow commands (`.claude/commands/flow-*.md`) are **PM/orchestrators**.
+Inspect the current issue, candidate, controlling intent, actual source,
+reviews, checks and relevant prior decisions. Enter at the earliest missing or
+stale useful judgment. A coherent existing candidate does not need historical
+flow artifacts manufactured retrospectively.
 
-They:
+Use prose to explain conclusions, evidence, alternatives and uncertainty. Use
+existing typed interfaces for effects and execution facts where those interfaces
+exist. Neither a narrative recommendation, a friendly actor name, an empty
+thread list nor a green wrapper is substantive approval by itself.
 
-- Translate intent into a sequence of narrow agent tasks
-- Keep flows moving (fix-forward, not stop-and-wait)
-- Read handoffs and route based on understanding
-- Checkpoint at flow boundaries with human-facing updates
-- Evaluate evidence, not vibes
+Keep local execution records and original evidence, but do not serialize an
+alternative current-PR database, writer-liveness roster or heartbeat log into
+tracked source. Update durable PR/issue guidance when a material decision,
+finding, dependency, evidence limitation or next route changes.
 
-Orchestrators **do not do the work**. They scope it, sequence it, route it.
+## Work forward and return to affected questions
 
----
+A useful normal route is:
 
-## Routing by Understanding
-
-**Law 2: Prose Routes Work**
-
-The orchestrator reads handoffs and decides. No parsing. No structured routing blocks. Claude understands language.
-
-| How It Works                                                           | How It Doesn't Work                               |
-| ---------------------------------------------------------------------- | ------------------------------------------------- |
-| Agent says "recommend routing to fixer" → orchestrator routes to fixer | Parse `{ "next_agent": "fixer" }` from JSON block |
-| Agent explains reasoning → orchestrator makes informed decision        | Follow rigid routing rules regardless of context  |
-
-The communication channel is natural language throughout.
-
----
-
-## Keep Flows Moving
-
-**Law 5: Fix Forward by Default**
-
-"Blocked" is almost always just routing to another agent. Keep the flow moving.
-
-### The Fix-Forward Pattern
-
-```
-Problem detected → Route to specialist → Get result → Continue
+```text
+understand the claim and actual consumer
+-> challenge the plan and discriminating proof
+-> implement with focused red/green evidence
+-> challenge tests, test cost, simplicity, docs and product fit
+-> independent substantive review and joined repairs
+-> explicit late qualification
+-> separate final current-repository/product judgment
+-> protected merge and landed reconciliation
 ```
 
-Not:
-
-```
-Problem detected → Stop → Wait for human → Resume
-```
-
-### When to Actually Stop
-
-True halt is rare:
-
-- Mechanical failure (tooling broken, permissions missing)
-- Non-derivable decision (human must choose business direction)
-- Unsafe boundary (secrets detected, must remediate)
-
-Even then, scope the halt narrowly. Other work may continue.
-
----
-
-## Flow Boundary Checkpoints
-
-At the end of each flow, provide:
-
-### Progress Update
-
-What was done in this flow. Summary, not dump.
-
-### Findings Summary
-
-Key results, evidence pointers, quality events.
-
-### Assumptions + Open Questions
-
-What was assumed and why. What needs human input.
-
-### Decision Requests
-
-If human input is needed, ask clearly:
-
-- What decision is needed
-- What options exist
-- What you recommend and why
-
-### Next-Flow Preview
-
-What the next flow will do. What it needs.
-
-### Artifact Links
-
-Pointers to receipts, evidence, cockpit surfaces.
-
----
-
-## The PR as Primary UI
-
-The PR description is what most reviewers will read. Treat it as the cockpit display.
-
-### Prefer Outputs That Make Review Fast
-
-| Good                             | Bad                      |
-| -------------------------------- | ------------------------ |
-| Short summary tables             | Long prose paragraphs    |
-| Mermaid diagrams (where helpful) | ASCII art                |
-| Links to evidence artifacts      | Inline raw output        |
-| Hotspot pointers                 | Comprehensive file lists |
-| Explicit "not measured"          | Silent gaps              |
-
-### Compression Is Kindness
-
-Every unnecessary line increases DevLT. Compress ruthlessly while keeping all necessary information.
-
----
-
-## No Mid-Flow Stoppage
-
-Questions can be logged anytime. But flows complete the phase and surface questions at the boundary.
-
-### The Pattern
-
-```
-Encounter uncertainty → Record assumption → Proceed → Ask at boundary
-```
-
-Not:
-
-```
-Encounter uncertainty → Stop → Ask user → Wait → Resume
-```
-
-Humans are asked at flow boundaries, with context, with options, with recommendations.
-
----
-
-## Completion Discipline
-
-**Flows run to completion. They never stop mid-execution.**
-
-A flow ends with one of two statuses:
-
-| Status         | When                    | What It Means                                |
-| -------------- | ----------------------- | -------------------------------------------- |
-| **VERIFIED**   | Evidence says done      | Panel green, evidence fresh, blockers empty  |
-| **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable |
-
-Everything else is "keep grinding."
-
-### No Early Exit
-
-Orchestrators do not accept "DONE" prose as completion. Completion requires:
-
-- **Evidence panel green** (all required sensors pass), OR
-- **External constraint** forces checkpoint (complete UNVERIFIED with honest state)
-
-"Feels done" is not done. "Agent said done" is not done. **Evidence says done.**
-
-**Any agent claiming completion without producing evidence is automatically treated as UNKNOWN and routed to the evidence producer** (test-runner, linter, mutation, etc.). This is the stop-hook that prevents early exit.
-
-### The Loop Body
-
-The microloop that produces convergence:
-
-```
-Author → Critic → Fixer → Verifier → [if not converged] → repeat
-```
-
-For each station:
-
-1. Run the producer (author, implementer, etc.)
-2. Run the critic (attacks the output)
-3. If critic finds issues → run fixer → run verifier
-4. Repeat until critic says "proceed"
-
-### Two-Pass Minimum for Stability
-
-When fixing an issue, **re-review at least once** to confirm stability. "Two passes" is a minimum observation window, not a maximum retry count.
-
-| Good                                 | Bad                                 |
-| ------------------------------------ | ----------------------------------- |
-| Fix → re-review → stable → proceed   | Fix → assume stable → proceed       |
-| Critic found nothing twice → proceed | Critic found nothing once → proceed |
-
-If re-review finds the same issue, you're not stable. Route to a different approach or escalate.
-
-### Routing to Unstick
-
-**Counts are not conditions. Signal is.**
-
-"We've run 3 times" → run it again. A count alone justifies nothing.
-
-**Stagnation** (same failure, no new signal) → orchestrator routes to unstick. Try a different agent, change the approach, get new signal. This is normal routing, not a special mechanism.
-
-**Oscillation** (toggling between states) → orchestrator breaks the cycle. Route to a different specialist, reframe the problem, get out of the loop.
-
-The orchestrator's job is to keep things moving. When progress stalls, route to unstick. That's orchestration.
-
-| Wrong                                | Right                                               |
-| ------------------------------------ | --------------------------------------------------- |
-| "3 tries, moving on"                 | "3 tries, running again"                            |
-| "Stagnation detected, stopping"      | "Stagnation detected, routing to different agent"   |
-| "Max iterations, proceeding as done" | "Still not converged, change approach"              |
-| "Timeout, assuming success"          | "External constraint hit, checkpointing UNVERIFIED" |
-
-### "Clean" Means Panel Clean
-
-"Clean" is defined by the evidence panel, not by any single sensor:
-
-- **Intent fidelity**: REQ/BDD/ADR satisfied (or explicit DEFAULTED/NEEDS_HUMAN logged)
-- **Verification depth**: Tests + mutation (where required)
-- **Maintainability**: Deltas acceptable / hotspots checked
-- **Boundaries**: Stage→sanitize→persist, secrets scan on staged surface
-- **Explainability**: Cockpit + pointers
-- **Freshness**: Evidence SHA matches HEAD
-
-If any of these are red/unknown AND it matters for this change, you're not clean.
-
-### Checkpoint Report
-
-When an external constraint forces UNVERIFIED completion, document:
-
-```markdown
-## Checkpoint
-
-**Constraint:** <budget | access | authority>
-**Detail:** <what specifically: tokens exhausted, tooling broken, decision needed>
-
-**Current state:**
-
-- <what's done>
-- <what's not done>
-
-**Evidence (if any):**
-
-- <artifact path>: <what it shows>
-
-**Recommended next step:** <what to do when constraint clears>
-```
-
-**Checkpoint means: save state, publish artifacts, recommend next route. Work continues when constraint clears.**
-
-This makes the flow resumable. External constraints are checkpoints, not failures. UNVERIFIED is not failure—it's unmerged state.
-
----
-
-## Local Resolution Before Bouncing
-
-**Law 7: Local Resolution First**
-
-Before bouncing to a previous flow:
-
-- Try 2-3 targeted specialist calls
-- Route to design-optioneer, adr-author, or impact-analyzer
-- Re-plan locally
-- Resume
-
-Bounce only when specialists agree the issue cannot be resolved locally.
-
-### The Economics
-
-```
-Microloop: ~10 minutes, focused context
-Flow bounce: ~60+ minutes, full context rebuild
-```
-
-Try local resolution first. Bounce only when truly necessary.
-
----
-
-## See Also
-
-- [flow-composition.md](../../docs/explanation/flow-composition.md) — How flows compose
-- [operating-model.md](../../docs/explanation/operating-model.md) — Full operating model
-- [laws-of-the-swarm.md](../../docs/explanation/laws-of-the-swarm.md) — The immutable rules
-- [90-voice-and-tone.md](90-voice-and-tone.md) — How to communicate findings
+The reasoning questions are revisitable, not a fixed conveyor. Different
+questions may proceed concurrently against one candidate. If a finding changes
+a premise, return to that premise now; do not make two or three arbitrary
+specialist calls before following the evidence. If a repair affects one test
+oracle, refresh that proof and its consumers without restarting unrelated work.
+
+Keep one writer for mutation. Reviewers may inspect source and evidence without
+claiming the branch. The root joins evidence, not votes; accepted repairs go to
+the existing writer while useful context and build state remain warm.
+
+## Review sufficiency and honest stopping
+
+After repair, verify the finding against actual source and affected proof.
+Further substantive review remains welcome after an earlier clean verdict.
+There is no two-clean-pass minimum, fixed reviewer count or automatic stop on
+`REVIEW_CURRENT`. Choose additional investigation by the questions it can answer
+and the defects or uncertainty it can expose.
+
+A repeated failure without new information is a reason to change the approach,
+repair an instrument or name the concrete blocker, not to repeat unchanged
+execution indefinitely. A quota limit preserves unique work and the intended
+billing route; it does not justify silent paid-API fallback or a clean verdict.
+
+When a real remote operation owns the next transition, record its actual
+request/run/attempt and the event that will change the decision. Do independent
+useful work or return an in-flight checkpoint without a resident polling worker.
+A tool acknowledgement alone is not persisted remote state: read back the
+operation before calling it in flight. Reconcile an uncertain effect before retry.
+
+Ask for a decision only where non-derivable intent, exposure, authorization or
+an irreversible effect genuinely needs it. Do not proceed through that boundary
+merely to avoid a mid-flow question. Do not ask for permission to perform an
+already authorized ordinary repair, review or continuation.
+
+## Publication and independent qualification
+
+The migration target is specified in
+[late qualification](../../docs/reference/late-qualification.md). Ordinary
+commit, push, Draft and Ready transitions publish work; they do not request
+expensive proof. A hook may prompt a useful local review; it must not become a
+mandatory remote reviewer or hidden CI dispatcher on every commit.
+
+Use the consumer's actually implemented explicit qualification operation. Bind
+the current candidate, accepted review and evidence, selected obligations and
+request identity. A retained label from an earlier head is not a new request.
+Duplicate or lost-response requests must reconcile with the existing operation.
+
+An absent post-request result is expected before the request and must not make
+source review circularly impossible. Conversely, complete source review does
+not supply missing integration proof. Each mandatory selected obligation must
+execute, reuse admissible evidence, be proven inapplicable or remain blocked.
+A catalogue is not an instruction to run everything.
+
+Normal complete active qualification stays within 20 minutes; retain failed,
+cancelled and retried attempts, setup, selected children and result finalization.
+Report queue/request time and total shifted local work separately. Never meet
+the clock by hiding necessary work or weakening the test.
+
+Green qualification does not automatically merge. Reacquire material findings,
+current source/base, evidence applicability and product intent, then decide
+separately. New findings can block merge on an unchanged head. Expected-head
+checking protects the candidate but does not freeze main; inspect the actual
+landed composition and retain a real incident if an untested interaction lands.
+
+No routine merge queue, auto-merge or every-main-push full replay belongs to the
+target. Preserve existing active protections until the compatible replacement
+is tested and activated by its owner. Do not invent request commands, copy
+candidate-authored green JSON into protected status, or bypass the installed
+route because these instructions describe a later generation.
+
+## Evidence handoff and currentness
+
+A reviewer needs the actual candidate and readable original evidence. A path
+that exists only in the sender's environment is not a completed handoff.
+Summaries are navigation; inspect load-bearing source, real consumers and
+falsifiers. Repeated summaries of one execution are not independent proof.
+
+Retain the actual source snapshot, command, environment, selected/executed
+subjects, outcome, capture completeness and evidence location. Staged/dirty
+execution needs those bytes, not merely HEAD. Keep dependency caches, compiler
+intermediates, test results and semantic review as separate reuse decisions.
+
+Later changes refresh only affected evidence and judgments. A new SHA alone
+is not a reason to replay everything; an unchanged SHA is not proof that no new
+finding exists. A test result's historical truth and present applicability are
+different. Unknown dependency impact widens the relevant proof or blocks it.
+
+## Completion and communication
+
+The root continues until the selected claim is reconciled, a real remote wait
+owns the next step, or a precise blocker prevents useful progress. A child
+return, receipt, plan, opened PR or green panel does not close a larger goal.
+
+Make handoffs proportional. Usually state the current claim/candidate, result,
+material evidence/findings, remaining limitation and next useful action. Add
+alternatives or a decision request when relevant. Do not demand a long repeated
+form at every internal question or create an empty repair commit for metadata.
+
+A merge completes implementation only to the extent actually landed. Packaging,
+release authorization, installed verification and user outcome retain their
+separate owners. Feed real failures back into the relevant skill/tool/graph
+with the loaded version, harness, observed action and tested correction. Do not
+claim behavioral adoption from structural checks or a generated diagram.
