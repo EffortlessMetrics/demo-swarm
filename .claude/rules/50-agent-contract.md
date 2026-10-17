@@ -3,211 +3,99 @@ globs:
   - .claude/agents/**/*.md
 ---
 
-# Agent Contract
-
-> How agents think, work, and hand off.
-
----
-
-## The Agent Promise
-
-Every agent is a **well-trained junior** who does real cognitive work:
-
-- Think through problems
-- Investigate the codebase
-- Make judgment calls
-- Produce artifacts with substance
-- Hand off with clear recommendations
-
-Agents are not clipboard-copiers. Agents are not template-fillers. Agents do work.
-
----
-
-## Single Responsibility, Done Deeply
-
-**Law 3: One Agent, One Job**
-
-Each agent has a single responsibility, done deeply. If it needs modes, split it.
-
-| Good                                 | Bad                                                            |
-| ------------------------------------ | -------------------------------------------------------------- |
-| `code-implementer` and `code-critic` | `code-agent --mode implement` and `code-agent --mode critique` |
-
-Separation ensures:
-
-- Focus (one thing, done well)
-- Clear handoffs (who does what is unambiguous)
-- No conflicts of interest (a critic doesn't review its own fixes)
-
----
-
-## Agent Prompt Structure
-
-Every agent prompt must include:
-
-### Your Job
-
-One sentence. What you do. What you don't do.
-
-### Inputs
-
-What to read. Where truth lives. What exists when you start.
-
-### Outputs
-
-Artifacts you will write. Where they go. What they contain.
-
-### How to Do It
-
-Steps, tips, positive prompting. What good looks like.
-
-### When Stuck
-
-Graceful outcomes. What to do when things don't go as expected. Partial is success if reported well.
-
-### Handoff
-
-What I did. What I found. What I recommend next.
-
----
-
-## The Handoff Contract
-
-Every agent returns two things:
-
-1. **An answer** — What they found, built, or concluded
-2. **A routing suggestion** — What should happen next and why
-
-### Handoff Structure
-
-Prose, not parsed blocks. Orchestrators read and understand.
-
-```
-What I did: <summary of work completed>
-What I found: <key findings, issues, results>
-Recommendation: <specific next step with reasoning>
-```
-
-### Always Make a Recommendation
-
-- Name specific agents when you know them
-- Explain your reasoning
-- If uncertain, say so and explain why
-
-**Good:** "Route to fixer to address the 3 MAJOR issues, then back to self-reviewer."
-**Bad:** "Done. See output file."
-
----
-
-## Default Recommendation + Neighbors
-
-Each agent should:
-
-- Have a default "happy path" next-step recommendation
-- Know 3-4 likely handoff targets (neighbors)
-- Describe neighbors briefly in context
-
-Agents do not need to know the entire swarm. They know their neighbors.
-
----
-
-## Honest Partial Reports
-
-An agent that completes 60% of the work and clearly documents what's done, what's blocked, and what to try next **has succeeded**.
-
-| Success                                                                                                                                                                    | Failure                           |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| "Implemented 3 of 5 endpoints. The remaining 2 require the User schema which doesn't exist yet. Recommend routing to code-implementer with User schema as the first task." | "Done." (when work is incomplete) |
-
-**Failure to complete work is not failure as an agent.** Hiding uncertainty behind false completion is the actual failure mode.
-
----
-
-## "Blocked" Language
-
-Avoid "blocked" unless it's truly halting:
-
-- Unsafe boundary (e.g., secrets)
-- Non-derivable human decision
-- Mechanical environment failure
-
-Otherwise: "Route to X because..."
-
-**Bad:** "BLOCKED: Code style does not match conventions."
-**Good:** "Routing to auto-linter to fix style issues."
-
----
-
-## Open Questions
-
-If something is unclear:
-
-1. Make the best safe assumption
-2. Record it (OpenQ or inline assumption note)
-3. Proceed
-4. Surface at flow boundary, not mid-flow
-
-Use DEFAULTED for safe assumptions, NEEDS_HUMAN for genuine blockers.
-
----
-
-## When Stuck: Debug, Don't Freeze
-
-If something fails:
-
-1. **Ground yourself in tool outputs** — compiler errors, test output, exit codes
-2. **Fix forward** — route to the appropriate fixer or do the fix if it's in scope
-3. **If the failure indicates intent mismatch** — surface it as DEFAULTED or NEEDS_HUMAN (authority line)
-
-**Do not stop the flow.** Write down assumptions and proceed unless:
-
-- Unsafe boundary (secrets, publish risk)
-- Authority required (business decision, customer impact)
-- Mechanical failure (tools broken, permissions missing)
-
-"Rerun" is a tool, not a virtue. Debugging is allowed. The goal is trust, not purity.
-
----
-
-## Evidence in Agent Outputs
-
-When making claims:
-
-- Point to specific files, lines, or artifacts
-- Include counts and metrics from tool outputs
-- Mark uncertainty explicitly
-
-**Good:** "Coverage: 82% (see test_execution.md)"
-**Bad:** "Coverage looks good"
-
----
-
-## The Authority Line
-
-NEEDS_HUMAN is about authority, not difficulty. **It's rare by design.**
-
-**Authority** = non-derivable decision with no safe default. Prefer DEFAULTED + log unless it's unsafe.
-
-| Agent Can Handle (DEFAULTED) | Requires Human (NEEDS_HUMAN)    |
-| ---------------------------- | ------------------------------- |
-| Researchable questions       | Business relationship decisions |
-| Derivable from codebase      | Risk tolerance choices          |
-| Safe defaults exist          | Org ownership questions         |
-| Reversible choices           | Customer impact trade-offs      |
-
-The test: Does the decision require someone's **authority** or just someone's **knowledge**?
-
-If it's knowledge, agents research, default safely, document reasoning, proceed.
-If it's authority, agents surface options, explain trade-offs, wait for boundary.
-
-**The bias is toward DEFAULTED.** Most questions have safe defaults. Research first, default if safe, escalate only when you're truly boxed in.
-
-See [authority-not-difficulty.md](../../docs/explanation/authority-not-difficulty.md) for the full explanation.
-
----
-
-## See Also
-
-- [agent-philosophy.md](../../docs/explanation/agent-philosophy.md) — Full philosophy
-- [contracts.md](../../docs/reference/contracts.md) — Communication patterns
-- [CLAUDE.md](../../CLAUDE.md) — The shared contract
+# Agent contract
+
+Agents investigate, reason, implement, test and make scoped judgments. Every
+agent shares the [engineering questions](00-doctrine.md#shared-questions):
+premise and specification, meaningful and complete proof, test and development
+cost, runtime behavior, simplicity, modularity, documentation and product fit.
+A named capability does not reserve one of those questions for a permanent role.
+
+## Focus the assignment
+
+Give a bounded task one coherent purpose and a sufficient return. The same
+capable agent can work through successive questions or take a fresh review
+perspective in a useful warm session. Split work when another context, method,
+instrument or capacity improves the result, not simply because a stage name
+changed. Preserve the repository's actual independent-review requirements.
+
+One mutation writer owns each candidate's contested surface. Other readers
+and reviewers can investigate without reserving it. A reviewer who finds a
+necessary repair returns evidence to the writer or receives an explicit scope
+change; it does not silently take over the branch. A bounded reader may use
+isolated fixtures or experiments when its assignment permits them.
+
+Every agent should recognize a wrong premise, weak oracle or product mismatch
+even if the immediate assignment concerns a different question. Surface that
+finding with its acceptance impact and return to the affected question now.
+Do not route through an arbitrary number of specialist calls before addressing it.
+
+## Supply the actual inputs
+
+An assignment needs the accepted outcome, current candidate or source,
+controlling instructions, material findings, accessible original evidence,
+useful work, permitted effects and owner who continues afterward. State missing
+inputs and uncertainty rather than manufacturing current facts from an old
+summary. A reference is useful only when the receiving worker can read it.
+
+Do not assume a child inherited the root's profile, rule files, full transcript,
+tools or local paths. Use the harness's supported task context to supply the
+relevant shared questions and repository instructions, or make their actual
+source available to the receiver. If that capability is absent, report the
+specific gap. A valid rule file or successful prompt linter does not establish
+that a harness loaded it or that an agent applied it.
+
+## Keep prompts useful
+
+Retain the existing prompt sections and helper interfaces that consumers use:
+
+- **Your job:** the coherent question or outcome and its actual scope.
+- **Inputs:** where the controlling intent, source and evidence can be read.
+- **Outputs:** useful findings, changes or observations and their accessible location.
+- **How to do it:** methods, relevant shared questions and realistic counterexamples.
+- **When stuck:** how to distinguish a repair from a missing capability or decision.
+- **Handoff:** result, limitations and the next useful action with its continuing owner.
+
+Existing `Handoff Targets` sections can list available neighbors. They are
+navigation, not a fixed-size roster or a mandatory next actor. Recommend the
+work and why it matters before choosing a capability. The next action may be
+performed by the existing root or writer when that is the useful route.
+
+## Evidence in the return
+
+Bind claims to what was actually read, changed or executed. Retain source/input
+identity, relevant command and environment, selected/executed subjects, outcome,
+capture limits and the original evidence. Use observed counts; do not infer a
+pass from silence, a generated file, a wrapper result or the agent's return.
+
+Preserve prior observations with their original subjects. Changed inputs refresh
+the affected questions and proof, not every previous result. A new finding can
+change readiness without a SHA change. Keep source review, qualification,
+final judgment and actual delivered behavior distinct. See
+[evidence and quality](40-evidence-and-quality.md).
+
+## Continue or hand back precisely
+
+A handoff explains the result, material finding or limitation, next action and
+why that action can resolve it. It may be short. Do not require a repeated long
+form, exact neighbor count or new agent identity. If the intended bounded task
+is incomplete, say what remains; honest partial evidence is useful without
+calling the parent's larger outcome complete.
+
+For a real remote wait, retain the actual operation identity and wake condition.
+An ordinary bounded qualification wait need not replace a warm accountable
+lead. A genuine interruption or session limit needs an accepted continuation
+handoff; a local path or a child stopping does not transfer ownership by itself.
+Avoid tight polling and keep independent useful work moving.
+
+Investigate derivable questions and make reasonable assumptions within accepted
+scope. A missing tool, unavailable execution capacity, failed proof and missing
+authorization are different situations. State the actual blocker and requested
+work, not a generic call for approval. Ask at the relevant boundary when a
+non-derivable decision or authority is genuinely missing; do not postpone that
+boundary simply to finish a named flow. Earlier authorization remains relevant.
+
+The root joins the result and continues the selected outcome. The same
+authorized lead may make the separate final judgment after qualification using
+fresh findings, source/base and product intent. A task return, source-ready
+label or green check does not make that judgment or authorize a release.

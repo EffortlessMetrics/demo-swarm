@@ -1,238 +1,97 @@
-# Evidence and Quality
-
-> Claims require pointers. The PR cockpit is the primary review surface.
-
-**The factory produces trust, not code.** Code is a byproduct. The actual product is a PR where the verification panel answers every question the reviewer would have asked.
-
----
-
-## The Evidence Discipline
-
-**Law 4: Evidence Over Trust**
-
-Claims require pointers. Receipts summarize tool outputs. "Not measured" is acceptable. False certainty is not.
-
-### The Standard
-
-| Good                                                                     | Bad                                 |
-| ------------------------------------------------------------------------ | ----------------------------------- |
-| "Tests pass (see `test_execution.md`: 15 passed, 0 failed, exit code 0)" | "I ran the tests and they all pass" |
-| "Coverage: 78% (see coverage_audit.md)"                                  | "Coverage looks good"               |
-| "Not measured: mutation testing skipped (no budget)"                     | "Tests are probably effective"      |
-
-Uncertainty is fine when labeled. Certainty without evidence is the failure mode.
-
----
-
-## Mechanical Completion
-
-"Done" is not a feeling. It is a mechanical state.
-
-| Status           | Meaning                                                                        |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `VERIFIED`       | Converged. Evidence panel green, evidence fresh, blockers empty.               |
-| `UNVERIFIED`     | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
-| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down.           |
-
-### What Evidence Shows
-
-| Condition                        | Status  |
-| -------------------------------- | ------- |
-| Evidence exists AND passes       | GREEN   |
-| Evidence exists AND fails        | RED     |
-| Evidence does not exist          | UNKNOWN |
-| Evidence is stale (SHA mismatch) | UNKNOWN |
-| Agent claims done, no evidence   | UNKNOWN |
-
-**UNKNOWN is not PASS.** Missing evidence is not passing evidence.
-
-### The Rule
-
-- **If evidence doesn't exist, status is UNKNOWN**
-- **If evidence is stale, status is UNKNOWN**
-- **Green checks are necessary, not sufficient** (panel beats single sensor)
-
-### Why This Matters
-
-The default failure mode in stochastic systems is "absence feels like success." An agent that doesn't find a problem may have:
-
-1. Found no problems (correct)
-2. Failed to look (incorrect)
-3. Looked in the wrong place (incorrect)
-
-Only captured evidence distinguishes case 1 from cases 2 and 3.
-
-### Completion Checklist
-
-Before marking work complete:
-
-- [ ] Evidence artifact exists on disk
-- [ ] Evidence artifact is tied to current HEAD (fresh)
-- [ ] Evidence shows explicit pass/fail, not silence
-- [ ] Panel criteria satisfied (not just one sensor)
-
-If any checkbox is unchecked, the work is UNKNOWN, not DONE.
-
----
-
-## Evidence Freshness
-
-Receipts are historical. Current state is NOW.
-
-| Status           | Meaning                                      |
-| ---------------- | -------------------------------------------- |
-| FRESH            | Evidence SHA matches current HEAD            |
-| ACCEPTABLE_STALE | Minor drift, still trustworthy               |
-| STALE            | Significant drift, re-verify before trusting |
-| UNKNOWN          | Cannot determine freshness                   |
-
-When evidence and current state diverge:
-
-- Note the divergence explicitly
-- Don't pretend the receipt is current
-- Re-verify if the change is significant
-
-See [evidence-freshness.md](../../docs/reference/evidence-freshness.md) for staleness policies.
-
----
-
-## The Quality Panel
-
-### Why a Panel (Not One Metric)
-
-Any single metric can be gamed (intentionally or accidentally):
-
-- "Passes tests" can hide complexity bloat
-- "High coverage" can hide hollow tests
-- "Mutation score" can be gamed with bad structure
-
-We use a **panel** that collectively approximates "good engineering."
-
-### Required PR Cockpit Surfaces
-
-Include (or link to) evidence for:
-
-| Surface                | What It Shows                                      |
-| ---------------------- | -------------------------------------------------- |
-| **Intent fidelity**    | REQ/BDD mapping; what changed and why              |
-| **Verification depth** | Tests + mutation; are the tests meaningful?        |
-| **Maintainability**    | Complexity deltas, churn hotspots, idioms          |
-| **Safety**             | Secrets scan, boundary notes                       |
-| **Operability/NFRs**   | Perf budgets, memory, binary size (where relevant) |
-| **Explainability**     | Risks, assumptions, "not measured", next steps     |
-
-### Claims Policy
-
-- **Important claims must have a pointer:** file path, command output, artifact link
-- **"Not measured" is allowed:** Be explicit about what was skipped and why
-- **Silent assertion is not allowed:** Never imply certainty without evidence
-
----
-
-## The North Star
-
-**PR Quality + Maintainability** with **minimal human review time**.
-
-This is not just speed. Not just quality. The _efficiency_ of producing quality.
-
-### The Ratio
-
-**Quality:DevLT** = PR quality achieved per minute of developer attention
-
-### The Trade-Off
-
-Machine time is cheap. Dev time is expensive.
-
-| Option A                  | Option B                  | Winner             |
-| ------------------------- | ------------------------- | ------------------ |
-| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably)   |
-| 2 hrs machine, 45 min dev | 6 hrs machine, 20 min dev | **B** (definitely) |
-| 1 hr machine, 60 min dev  | 4 hrs machine, 15 min dev | **B** (absolutely) |
-
-More verification loops, more critic passes, more evidence generation = more machine time but less dev review time. That's almost always the right trade.
-
----
-
-## Verification Strategies
-
-### Spend Tokens to Save Attention
-
-- Run more verification loops (cheap)
-- Generate better evidence summaries (cheap)
-- Produce cleaner PR descriptions (cheap)
-
-All to reduce the human review burden (expensive).
-
-### Front-Load Quality
-
-Shift-left with:
-
-- BDD scenarios (intent before code)
-- Critics (find issues before human sees them)
-- Mutation testing (prove tests work)
-
-Issues caught by machines don't require human attention.
-
-### Compress Ruthlessly
-
-- Cleanup agents summarize, don't dump
-- Receipts highlight, don't enumerate
-- PR cockpits orient, don't overwhelm
-
-Every unnecessary line increases DevLT.
-
----
-
-## Review Is an Audit Skill
-
-The reviewer's job is **evidence sufficiency**, not diff archaeology.
-
-Questions a skilled reviewer asks:
-
-- Is the evidence fresh? (SHA matches HEAD?)
-- Is the panel complete for the risk profile?
-- What 3-8 hotspots should I spot-check?
-- What evidence proves each major claim?
-- What's explicitly "not measured" vs silently missing?
-
-This is cockpit piloting: read instruments, verify readings, spot-check controls. Not line-by-line code reading.
-
----
-
-## The Codebase Is a Mold
-
-The existing codebase shapes all future generation.
-
-**Schema gravity:** Existing patterns, conventions, and structure constrain what gets generated. A well-structured codebase produces well-structured output. A messy codebase produces consistent mess.
-
-**Implications:**
-
-- Improving the mold (refactoring, better interfaces, clearer conventions) improves all future output
-- Technical debt compounds: bad patterns get reinforced
-- Maintainability work is first-class because it increases future reliability
-
-The codebase is not just what we ship. It's the jig that shapes everything we make.
-
----
-
-## What Reviewers Actually Need
-
-Most reviewers will only read the PR description. Treat it as the cockpit display.
-
-| They Need                           | They Don't Need           |
-| ----------------------------------- | ------------------------- |
-| What changed (summary)              | Every line that changed   |
-| Why it changed (intent link)        | The full requirements doc |
-| What was verified (evidence table)  | Raw test output           |
-| Where to spot-check (hotspots)      | Comprehensive file list   |
-| What's not measured (explicit gaps) | Silent assumptions        |
-
-The diff is for spot-checks and audits. The cockpit is for decisions.
-
----
-
-## See Also
-
-- [claims-and-evidence.md](../../docs/explanation/claims-and-evidence.md) — Full evidence discipline
-- [pr-as-review-surface.md](../../docs/explanation/pr-as-review-surface.md) — Why the PR cockpit matters
-- [economics.md](../../docs/explanation/economics.md) — The math behind the trade-offs
+# Evidence and quality
+
+Evidence supports a claim about useful software. A PR summary helps readers
+find source, findings and proof; it does not replace substantive investigation
+or make a green panel the product. Apply the
+[shared engineering questions](00-doctrine.md#shared-questions) throughout the
+work, including premise, test oracle, completeness, efficiency and product fit.
+
+## Bind observations to what happened
+
+Retain the actual source or immutable input identity, command and environment,
+selected and executed subjects, result, capture limitations and accessible
+original evidence. A dirty or staged run needs those bytes; HEAD alone cannot
+identify them. A hash binds bytes but does not authenticate a producer or prove
+execution. A sender-local path is not a completed handoff to another worker.
+
+Distinguish product failures, instrument failures, missing evidence, proven
+inapplicability and work that has not run. A zero exit from a wrapper does not
+turn failed, skipped or absent children into successful proof. Preserve partial
+success and interruption honestly without calling the interrupted whole a pass.
+
+Tests need a relevant stimulus, actual consumer and discriminating oracle.
+Passing a test that also accepts the realistic defect is weak evidence. Coverage
+or a generated file can identify where to investigate; neither alone proves
+correct behavior, completeness or delivery.
+
+## Historical truth and present applicability
+
+An observation remains evidence about its original subject. Separately assess
+whether it supports the current claim. Review source, dependencies, environment,
+selected obligations, findings and intended use at the scope that can affect it.
+
+| Change or observation | Useful response |
+| --- | --- |
+| New SHA with an unrelated edit | Preserve original evidence and explain why its subject remains applicable. |
+| Material source, dependency, environment or oracle change | Refresh affected proof and its consumers; retain unaffected evidence. |
+| New material finding on the same head | Investigate and reconsider readiness even if earlier tests passed. |
+| Unknown impact or unavailable original inputs | Name the gap; inspect, widen the relevant proof or keep the affected claim unproved. |
+| H1 request followed by H2 | Preserve H1 results; do not treat that request or its status as an H2 qualification. |
+
+Do not rename old evidence as a current-head execution. Equally, do not erase a
+valid observation merely because HEAD moved. Existing helper status fields and
+receipt schemas remain unchanged; explain subject and applicability alongside
+them instead of inventing counters, silently rewriting history or using SHA
+equality as universal semantic currentness.
+
+Dependency-cache reuse, compiler-artifact reuse, test-result reuse and semantic
+review are separate decisions. A reusable build directory does not establish a
+passing test, and an applicable review does not supply a missing required check.
+Use the consumer's actual admission and proof rules for consequential effects.
+
+## Review the engineering claim
+
+Inspect load-bearing code, real entry paths, tests and credible counterexamples.
+Ask whether the specification and design serve the user before spending effort
+proving the wrong behavior. Simplification, modularity, supported compatibility,
+documentation and product direction remain review questions even after tests
+are green. A fixed set of metrics or spot-check count cannot answer every claim.
+
+Choose further criticism by the uncertainty or failure it could expose. Vary
+the evidence, method, oracle, assumptions or attention where useful. A changed
+role name or repeated clean result alone does not establish independence.
+Preserve native independent-review requirements and disposition new material
+findings even when an earlier review was clean.
+
+## Account for quality and cost together
+
+Keep runtime efficiency, development efficiency and test efficiency distinct.
+Measure relevant product workloads and resources; inspect build, feedback,
+review and recovery costs; make repeated tests inexpensive while preserving
+their discrimination and required coverage. More compute or more review passes
+can be useful, but their value must follow the question they answer.
+
+Preserve the complete qualification boundary and timing in
+[the current doctrine](00-doctrine.md#publication-qualification-and-merge-are-distinct).
+Queue delay, total machine occupancy and work shifted into warm sessions are
+separate measurements. A faster component or warm run does not establish a
+faster complete route. Do not weaken an oracle, omit an obligation or hide setup
+to meet a timing target.
+
+## Completion and next action
+
+Use `VERIFIED`, `UNVERIFIED` and `CANNOT_PROCEED` with the scope defined by
+[CLAUDE.md](../../CLAUDE.md). A source-review conclusion can be complete while
+future qualification is NotRun; do not create a CI-before-review cycle. Source
+review also does not grant a missing qualification result or merge authority.
+
+Complete qualification supplies evidence for a separate final decision over
+current findings, integration, applicability and product intent. The same
+authorized lead can make that decision with fresh inputs. A required check,
+resolved thread or green panel alone does not perform it. Protected merge and
+actual landed reconciliation remain distinct from release or installed delivery.
+
+Make the successor's work clear: what claim is supported, which original
+evidence supports it, what changed, what remains uncertain and the next useful
+action or actual remote wake condition. Reuse native issue, PR, review and check
+records; local evidence does not become a second live-state authority.
