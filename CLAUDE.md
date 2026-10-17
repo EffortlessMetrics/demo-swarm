@@ -75,8 +75,8 @@ bash .claude/scripts/demoswarm.sh <command>
 ```
 
 The helpers' existing schemas remain unchanged. Missing/unknown counters must
-not be invented. A required helper failure is an instrument failure until
-understood, not an instruction to fabricate a passing receipt.
+not be invented. A failed helper invocation remains non-successful until its product or instrument
+cause is understood; it is not an instruction to fabricate a passing receipt.
 
 ## Publication and consequential effects
 
