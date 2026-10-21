@@ -20,6 +20,22 @@ Inspect the consuming repository's installed workflow, required checks and
 actual request operation. Preserve those controls until its replacement is
 qualified. Never invent a request command or grant yourself bypass authority.
 
+## Selected integration mode
+
+The October 21 RIPR/Perl ruling selects native queue-time qualification. Follow
+[native queue-time qualification](docs/reference/native-queue-qualification.md)
+for its target, safe cutover, rollback and acceptance cases. Selection is not
+activation and does not opt every pack consumer into a queue.
+
+Where older rules, helpers or explanation docs forbid queues universally or put
+all final judgment after qualification, this mode-specific contract governs:
+keep the installed legacy route until the consumer verifies its replacement;
+on the verified queue route, complete product/scope/merge authorization before
+enqueue, qualify the actual group, and reconcile native landing afterward.
+Enqueue is conditional authorization to land, not a neutral test request. Do not
+use generic auto-merge to bypass the legacy final decision. Release authority,
+existing helper schemas and all unaffected review/evidence controls stay separate.
+
 ## Entry and ownership
 
 Continue actionable work on the owned PR before creating a duplicate. Resolve a
@@ -46,8 +62,8 @@ proof that no material review finding has arrived.
 | `/flow-2-plan` | Challenged design and bounded implementation claim |
 | `/flow-3-build` | Coherent implementation, discriminating warm proof and quality work |
 | `/flow-4-review` | Current substantive findings and evidence-backed repair dispositions |
-| `/flow-5-gate` | Explicit qualification and its actual result, not merge permission |
-| `/flow-6-deploy` | Separate final integration judgment, protected merge and reconciliation |
+| `/flow-5-gate` | Applicable qualification; queue admission requires prior conditional merge authorization |
+| `/flow-6-deploy` | Integration judgment before the consequential merge/enqueue action, then landed reconciliation |
 | `/flow-7-wisdom` | Evidence-backed product and operating-method improvement |
 
 Names are stable navigation. They do not require a fresh agent, every historical
@@ -90,11 +106,13 @@ reviewed candidate through the installed adapter; retain request identity and
 readback. A retained label cannot authorize a successor. A lost response needs
 reconciliation, not blind retry.
 
-After complete qualification, make a separate final judgment over current
-findings, product fit, actual base and evidence applicability. Use a protected
-expected-head merge without auto-merge, routine queueing or bypass. Inspect the
-landed result. Tagging, publication and deployment need their own authorization
-and evidence; a merge recommendation supplies neither.
+On the installed legacy route, complete qualification and then make the separate
+final judgment before a protected expected-head merge. On a verified native queue
+route, make product/scope judgment and conditional merge authorization before
+enqueue; actual G qualification and current eligibility govern native protected
+landing. Do not add a second full qualification or an imaginary post-green pause.
+In either mode, inspect the landed result. Tagging, publication and deployment
+need their own authorization and evidence; a merge recommendation supplies neither.
 
 ## GitHub Access + Content Mode
 
