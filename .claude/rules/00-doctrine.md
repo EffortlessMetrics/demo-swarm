@@ -6,6 +6,11 @@ distinguishes the intended method from the currently installed execution route.
 
 ## Intent and evidence
 
+We practice **zero trust development** and **fallibilism**. Issues, specifications,
+agent reports, tool results and maintainer assumptions are all revisable. A
+canonical location identifies the current record; it does not make every claim
+inside that record correct. Separate instruction authority from factual evidence.
+
 The maintainer's accepted direction governs what the work should become.
 Current source, real behavior and evidence govern what we can claim. A failing
 test may refute an implementation; it does not silently select a different
@@ -14,6 +19,14 @@ product. Conversely, an accepted specification does not prove the code works.
 Keep observations, inference, proposals, accepted decisions, current outcomes and
 superseded conclusions distinguishable. Preserve material contrary evidence and
 why a decision changed. Summaries of one observation are still one source.
+
+This does not require constant re-verification. Use the evidence already gathered
+and assess its applicability to the next decision. Investigate relevant changes,
+contradictions, unsupported load-bearing premises and gaps that matter to the
+claim. Retain unaffected evidence under its original identity. A new session,
+question or SHA alone does not reset the whole proof state. Record material
+changes and reasons where the next worker will find them; do not emit a new
+status artifact or comment for every internal step.
 
 Agents can question an open plan. Once the maintainer rules, implement that
 objective unless new evidence changes a relevant factual or safety boundary.
@@ -42,6 +55,13 @@ Keep useful repository, build and model context across implementation, review
 feedback and repair. Enter existing coherent work at the earliest missing or
 stale useful judgment; do not reconstruct an entire pipeline to satisfy its
 historical sequence.
+
+Prefer the same useful agent session or a context-preserving fork for successive
+review and repair. Give it a different question, counterexample, oracle or
+attention surface. A separate reviewer is useful when the additional discovery
+justifies context acquisition and coordination cost, not as a mandatory identity
+change. Retain honest provenance for each arrangement. Measure useful accepted
+work and downstream compute avoided, not review count or tokens alone.
 
 ### Shared questions
 
@@ -82,6 +102,14 @@ findings or retain an evidence-backed bounded disposition; reject incorrect
 findings with evidence. Stop redundant work by its diminishing useful value,
 not by either a fixed retry count or an obligation to keep calling models.
 
+For behavior changes, establish the defect or missing behavior and a proof that
+distinguishes it from the intended result. Prefer red/green at the actual consumer.
+Where that is not feasible, retain the reason and a meaningful negative control,
+differential result or other falsifier; a green-only assertion cannot demonstrate
+that it detects the claimed defect. Proof strength and recurring execution cost
+are separate decisions. Keep focused proofs cheap and place broad/platform/deep
+work in the appropriate tier rather than running everything at every edit.
+
 ## Ownership and recoverability
 
 Keep one mutation writer per candidate. Reading, research and review require no
@@ -102,11 +130,24 @@ retain evidence; they do not become an alternative repository-state authority.
 
 ## Publication, qualification and merge are distinct
 
-The target method keeps commits, pushes, Draft publication and Ready cheap.
-Their purpose is sharing work and evidence. Ready is not the CI launch button.
-After substantive review and warm proof converge, explicitly request
-qualification for the current candidate and evidence. A retained request label
-on an earlier head does not authorize a successor.
+The selected steady state keeps CI out of development: commits, pushes, Draft
+publication and Ready share work and evidence without starting any CI. Focused
+tests and substantive review remain in the coding session. A hook can publish
+useful evidence without dispatching CI. Inspect the installed route before
+publication; this instruction does not silently migrate existing consumers.
+
+Follow [native queue-time qualification](../../docs/reference/native-queue-qualification.md)
+for the selected RIPR/Perl mode. The owning session makes the current product,
+scope and conditional merge judgment, satisfies applicable native/orchestrator
+checks, then enqueues the reviewed candidate. Actual combined-state qualification
+and current eligibility govern protected landing. No fresh merge agent, routine
+post-green approval or second full qualification is required.
+
+Consumers still on the legacy protected route retain their installed explicit
+request, qualification and separate final merge judgment until the replacement
+is qualified. A retained request label on an earlier head does not authorize a
+successor. Neither a clean source review nor an admission result substitutes
+for the required integration proof.
 
 Select mandatory obligations and justified risk-directed proof before expensive
 allocation. Reuse admissible evidence under its actual subject and provenance;
@@ -114,13 +155,19 @@ unknown applicability is not a no-op. CI run duration normally stays within
 20 minutes including required setup, selected children and finalization.
 Request/queue latency and shifted local work remain separate measurements.
 
-Qualification produces evidence, not merge permission. Afterwards make a fresh
-product, findings and current-repository/integration judgment, then use the
-actually authorized protected expected-head merge. No routine merge queue or
-auto-merge is part of this target. Do not replay full CI merely because the PR
-merged. The separate ordinary main-health policy requires both one hour and
-ten merges since its baseline; prioritize genuine repairs and contain affected
-work while demonstrably independent work continues.
+Qualification produces evidence; authorization comes from the applicable route.
+Individually green branches can fail when combined. Keep candidate, merge-group
+and landed identities distinct, and reconcile actual landing. Do not replay full
+CI merely because the PR merged. The separate ordinary main-health policy
+requires both one hour and ten merges since its baseline; prioritize genuine
+repairs and contain affected work while demonstrably independent work continues.
+
+Request coalescing is separate from merge ordering. Where installed, preserve
+useful active-run feedback and keep only the latest pending successor, rather
+than cancelling active work on every update. A run whose subject loses landing
+eligibility may still provide diagnostic evidence; it cannot authorize a new
+subject. Unsafe or uninformative work may stop early. Neither coalescing nor
+late cancellation substitutes for a native queue's composition proof.
 
 This instruction file does not install that route, alter protection, publish a
 required check or authorize a release. During migration, inspect the actual
