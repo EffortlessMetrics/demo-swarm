@@ -82,12 +82,18 @@ not require another routine approval after green.
 ## GitHub constraints that determine the design
 
 GitHub couples PR and merge-group required checks: the required contexts must
-be satisfied before enqueue and must also report on G. The design therefore
+be satisfied before enqueue and must also report on G. The final design therefore
 needs real exact-H admission context publication plus applicable G proof,
 protected by enforced queue-only landing. Admission publication is an explicit
 operation at the admission boundary, not an automatic PR-event CI workflow.
 Its approved producer and expected application binding are implementation and
 native-acceptance obligations; a worker assertion is not sufficient.
+
+The bounded migration bootstrap is different: existing full PR qualification
+continues to publish the required admission contexts, and current exact-H source
+review and conditional merge authorization remain prerequisites to enqueue.
+The cheaper explicit publisher replaces that full producer only in step 5;
+it does not leave an admission-free window or weaken the bootstrap's proof.
 
 Never change a protected PR result from qualification to admission while direct
 landing can still consume it. Every required context needs a valid G disposition,
@@ -120,13 +126,16 @@ observed valid runtime, not permission to call a long run efficient.
 3. Rehearse the source and failure controls under non-required identities. Keep
    the old required proof available. Synthetic fixtures are not native G evidence.
 4. Through the existing authorized settings owner, enable and read back queue
-   enforcement for a bounded bootstrap while full legacy PR proof remains.
-   Observe the first actual native G transaction here, not as a circular
-   prerequisite to writing its producer. Record temporary duplicate costs.
+   enforcement for a bounded bootstrap. Full legacy PR qualification supplies
+   the required entry contexts; current exact-H review and conditional merge
+   authorization are also required before enqueue. Observe the first actual
+   native G transaction here, not as a circular prerequisite to writing its
+   producer. Record temporary duplicate costs.
 5. After queue-only landing and every protected producer are demonstrated,
-   activate explicit admission publication and remove ordinary PR-event CI,
-   including cheap wrappers, plus duplicate broad main-push work. Sweep callable
-   children and indirect callers. Keep distinct incident/deep/release obligations.
+   replace full PR qualification with the qualified explicit admission publisher
+   and remove ordinary PR-event CI, including cheap wrappers, plus duplicate
+   broad main-push work. Sweep callable children and indirect callers. Keep
+   distinct incident/deep/release obligations.
 6. Record native entry, actual G proof, protected M and matched readback. Verify
    zero CI starts for ordinary Draft/Ready/update events and inspect the first
    operating cohort for false passes, false blocks, queue age and accepted-change cost.
