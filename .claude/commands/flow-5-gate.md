@@ -1,13 +1,17 @@
 ---
 name: flow-5-gate
-description: Request and reconcile exact-candidate independent qualification without granting merge or release permission.
+description: Request and reconcile applicable qualification under the installed route; native queue admission requires prior conditional merge authorization.
 ---
 
 # Flow 5: Independent qualification
 
 Buy the remaining required assurance after warm development and substantive
-review. This flow requests and reconciles proof; it does not merge, tag or
-release. A qualification pass is an input to Flow 6's separate judgment.
+review. It does not grant release authority. Select the installed integration
+mode from CLAUDE.md and the native-queue reference before taking an action.
+On the legacy route, qualification supplies Flow 6's later final judgment.
+On a verified queue route, obtain Flow 6's product/scope judgment and conditional
+merge authorization first: enqueue can lead to automatic protected landing.
+Flow numbers are navigation, not a mandatory call order.
 
 ## Admission before allocation
 
@@ -45,6 +49,12 @@ If the installed route is still legacy, name its actual behavior and use only
 the migration owner's approved qualification path. Do not invent a command,
 disable a check or use candidate-authored success data as authority.
 
+On the verified queue route, use exact-H admission and the installed enqueue
+adapter only after that conditional merge authorization. Bind the real group G,
+its base/constituents, current eligibility and complete selected proof. Real cheap
+PR admission is not a second full qualification and cannot authorize direct merge.
+A native queue result applies to G, not an arbitrary PR event or later composition.
+
 ## Execute and reconcile
 
 Read back the accepted native request/run/attempt. An acknowledgment is not a
@@ -53,8 +63,10 @@ operation before deciding whether another attempt is justified. Preserve useful
 in-flight work and original evidence; do not automatically cancel it on a push.
 
 The same useful owning lead normally carries the request through the ordinary
-CI wait, complete result inspection, Flow 6's separate final judgment, authorized
-protected merge and landed readback. Different decisions do not require different
+CI wait and complete result inspection through the installed mode's authorization
+and landing. On the legacy route, final judgment follows qualification; on the
+queue route, conditional authorization preceded enqueue and native proof gates
+landing. Flow 6 still owns landed readback. Different decisions do not require different
 agents or a routine human approval. Do not stop at green or hand off merely
 because a named flow ended.
 
@@ -91,5 +103,7 @@ combined receipt cannot substitute for the separate current final decision.
 A complete applicable result proceeds to `/flow-6-deploy`. A new material review
 finding routes back to `/flow-4-review`, even on unchanged source; historical
 passing tests remain true. Missing capability/evidence receives a precise held
-result and next action. No merge, auto-merge, queue, tag, release or protection
-change is an effect of this flow.
+result and next action. Legacy qualification does not merge or enqueue. In verified
+queue mode, the explicitly authorized enqueue permits native protected landing
+only on successful current proof; do not add a second merge call. Neither mode
+authorizes tags, releases, settings changes or protection bypass.

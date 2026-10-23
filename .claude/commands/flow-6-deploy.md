@@ -9,13 +9,16 @@ The command keeps its existing name for callers. Its ordinary outcome is a
 reviewed change on the selected repository's mainline, not an automatic public
 release or production deployment. Upstream promotion is a separate operation.
 
-## Fresh judgment after qualification
+## Fresh judgment before the consequential action
 
 Reacquire the current candidate, target base, latest material findings and the
-actual qualification result. Confirm the implementation still fits the accepted
-product and architecture, has not been superseded, and has sufficient applicable
-proof. An unchanged head can receive a new adverse finding. An unrelated base
-movement does not automatically require rebase or a complete replay.
+available evidence. Confirm the implementation still fits the accepted product
+and architecture, has not been superseded, and has sufficient applicable proof
+for the next transition. On the legacy route, this is final judgment after
+qualification and before direct protected merge. On a verified native queue
+route, this is conditional merge authorization before enqueue; missing future G
+proof is not circularly required, but it must pass before native landing. An
+unchanged head can receive a new adverse finding. An unrelated base movement does not automatically require rebase or a complete replay.
 
 Inspect actual shared semantic owners, dependencies, generated inputs and conflict
 resolution. Refresh affected proof where the composition requires it. Unknown
@@ -28,11 +31,13 @@ not permit a fixed actor checklist to replace the actual decision.
 
 ## Separate consequential operations
 
-A currently reviewed and qualified candidate may be merged only within the
-requester's actual authorization and installed repository protection. Use the
-normal expected-head protected squash path for ordinary development; preserve
-any separately governed source-promotion semantics. No bypass, routine auto-merge
-or native merge queue is part of the target method.
+A candidate may land only within the requester's actual authorization and
+installed repository protection. On the legacy route, use the normal expected-head
+protected squash after qualification and final judgment. On a verified native
+queue route, authorize exact H conditionally, use the installed enqueue adapter,
+and let successful current G proof permit protected native landing. Do not issue
+a competing direct merge or assume a post-green pause exists. Preserve separately
+governed source-promotion semantics; no bypass is authorized in either mode.
 
 Do not create tags, publish packages, create/finalize a GitHub Release, deploy an
 external service or promote to another repository from a merge verdict. Those
@@ -41,8 +46,10 @@ proof and recovery owner. `merge_tag_release` is not an ordinary combined action
 
 Ask repo-operator only for the specific authorized effect. An expected-head guard
 protects the PR head but does not atomically freeze the target base. Inspect the
-current integration and preserve that residual risk rather than claiming the
-entire composition was tested when it was not.
+current integration and preserve that residual risk on the legacy route rather
+than claiming the entire composition was tested when it was not. A native queue
+supplies current-composition proof only when the actual G, constituent eligibility
+and protected result are verified; an enqueue acknowledgment is not that proof.
 
 Do not automatically rebase because main advanced. Preserve unique source and
 handle genuine conflicts through the existing candidate writer. Never choose
