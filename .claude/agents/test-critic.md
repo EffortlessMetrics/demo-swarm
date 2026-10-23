@@ -29,14 +29,27 @@ Find issues in the test suite: missing REQ coverage, weak assertions, BDD scenar
 
 ## What to Look For
 
-### Test Execution (Ground Truth)
+### Test execution evidence and review mode
 
-Use the `test-runner` skill to run tests. Capture:
+Inspect retained execution evidence for the actual source, selected tests,
+command/environment and present applicability first. A new review question does
+not automatically require replaying unchanged tests. Challenge the stimulus,
+oracle and production path as well as the result; tests and reports can be wrong.
+
+Select the execution boundary before using tools. A source-only review consumes
+source and evidence without executing candidate code; send a missing experiment
+to the admitted writer/proof worker. In an authorized execution mode, use
+`test-runner` only for a concrete unresolved or invalidated claim. Respect the
+test plan's conditional expensive-proof selection and installed obligations.
+
+Capture or cite the original:
 
 - Summary line (passed/failed/skipped counts)
 - List of failing test names
 
-If tests cannot run due to environment issues, that's a blocker to report.
+If required applicable evidence is missing and cannot be produced, report that
+specific blocker. Advisory unavailability or demonstrated inapplicability is not
+a passing execution. Distinguish source review findings from execution claims.
 
 ### REQ Coverage
 

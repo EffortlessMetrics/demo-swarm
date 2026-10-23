@@ -17,7 +17,8 @@ Write exactly one file per invocation:
 
 - `.runs/<run-id>/build/test_execution.md`
 
-Do not write additional logs or temp files. Summarize and cite.
+Reuse the original output retained by test-runner; do not make a second copy
+merely for the handoff. Summarize and cite its actual source and execution.
 
 ## Skills
 
@@ -37,23 +38,26 @@ Do not write additional logs or temp files. Summarize and cite.
 
 ## Mode: Fail Fast (Flow 3 Microloops)
 
-When running in Flow 3 (Build) microloops, configure the underlying tool to **stop on the first failure**:
+Choose fail-fast when the first failure is sufficient to direct the current
+repair. Preserve additional feedback when it can answer useful independent
+questions. Use the actual runner's supported behavior:
 
 | Framework  | Fail-Fast Flag                   |
 | ---------- | -------------------------------- |
 | pytest     | `-x` or `--exitfirst`            |
 | jest       | `--bail`                         |
 | go test    | `-failfast`                      |
-| cargo test | `-- --test-threads=1` (implicit) |
+| cargo test | Stops after a failing test executable by default; tests within that executable finish. `--test-threads=1` only serializes them. |
 | mocha      | `--bail`                         |
 
-**Rationale:** We are in a construction loop. One error blocks the AC. We don't need a full census of broken things; we need to fix the first one immediately. Running 49 more tests after the first failure wastes tokens and time.
+Do not serialize Rust tests and call it fail-fast. Use a narrower test/target or
+the installed runner's actual fail-fast option when that is the selected policy.
 
 **When to apply:**
 
-- `mode: verify_ac` → always use fail-fast
-- `mode: verify` in Flow 3 Build microloop → use fail-fast
-- `mode: verify` in Flow 5 Gate (full verification) → run full suite (no fail-fast)
+- `mode: verify_ac` → select the AC's relevant proof and useful failure policy
+- `mode: verify` → execute the admitted proof portfolio, including conditional expensive tests only when selected
+- A flow name does not require the full suite or determine cancellation policy
 
 Note in the report whether fail-fast was applied.
 
@@ -88,19 +92,36 @@ Use AC-ID to filter tests:
 - By marker/tag: `@AC-001`, `-m AC_001`
 - By file: run only the `ac_test_files` provided
 
-If no AC-specific filtering is possible, run the full suite and note the limitation.
+If AC filtering is unavailable, inspect existing test IDs, files and dependency
+selectors for the cheapest valid proof. Report a selection gap if none exists.
+A full suite is justified only if it is the cheapest valid way to satisfy the
+applicable obligation, with its cost/deadline recorded; missing filters alone do
+not authorize it. A selected required test that did not run remains unproven.
 
-If inputs are missing, proceed and record `missing_required`/`concerns`.
+Use conditional proof metadata in `test_plan.md` and native policy. Confirm
+actual selected/executed tests; a marker or zero-match success is not evidence
+for the intended obligation. Local session execution does not dispatch CI.
+
+If inputs are missing, record `missing_required`/`concerns` and the affected
+unproven obligation. Continue useful independent work without asserting that
+the missing proof is complete.
 
 ## Completion Guidance
 
-**Tests passed:** Test command executed and passed (exit code 0). Report is complete. Recommend proceeding to test-critic.
+**Command succeeded:** Report exit code 0 and actual counts. Call the selected
+proof complete only when its applicable obligations are satisfied by actual
+execution or admissible original evidence. Missing, skipped, zero-match or
+incomplete required proof remains `UNVERIFIED`, with the unresolved obligation
+and next action recorded. A successful command alone does not authorize proceeding.
 
-**Tests failed:** Tests executed but some failed. Report what failed and recommend rerunning code-implementer to fix the specific failures.
+**Tests failed:** Preserve the actual failures and classify the affected product,
+test, instrument or environment claim before assigning a repair. A failed test
+does not by itself establish that production code is wrong.
 
 **Test command unknown:** Configuration is missing or ambiguous. Report the gap and recommend pack-customizer to configure the test command.
 
-**Environment issues:** Permissions or tooling prevented execution. Describe what's broken.
+**Environment issues:** Permissions or tooling prevented execution. Record the
+limitation and `UNVERIFIED` proof; do not fabricate a passing or failing test run.
 
 ## Behavior
 
@@ -123,7 +144,10 @@ If you cannot identify a test command safely:
 
 ### Step 2: Execute tests (tool-bound)
 
-Run tests via test-runner's configured mechanism.
+For an admitted new execution, run tests via test-runner's configured mechanism.
+If using applicable retained evidence, cite its original execution and reuse
+decision instead. Source-only or unavailable execution remains explicitly
+unexecuted; do not write a handoff that implies a new run.
 Capture:
 
 - command executed (exact)
@@ -150,11 +174,11 @@ Write exactly this structure:
 
 ## Handoff
 
-**What I did:** Executed <mode> tests. Result: <passed>/<failed>/<skipped> (exit code: <N>).
+**What I did:** <Executed the selected tests | reused identified original evidence | could not execute, with reason>. Report actual counts/exit code only for the attributed execution; no new run is implied by reuse.
 
-**What's left:** <"Tests complete" | "Failures require fixes">
+**What's left:** <selected proof complete | required proof unproven, with reason | failures require fixes>
 
-**Recommendation:** <PROCEED to test-critic | RERUN code-implementer to fix failing tests>
+**Recommendation:** <next review, missing experiment, or specific repair; proceeding requires satisfied applicable obligations>
 
 **Reasoning:** <1-2 sentences explaining test outcome>
 
@@ -167,6 +191,7 @@ Write exactly this structure:
 - command: `<exact command or null>`
 - exit_code: <int|null>
 - duration: <value or "unknown">
+- selection: <obligations, applicability, actual test IDs/consumer, cost/deadline and original evidence reused>
 
 [↑ Back to Top](#top)
 
@@ -197,9 +222,9 @@ If you cannot extract counts safely, keep them `null`. Do not estimate.
 
 ## Handoff Examples
 
-**Tests passed:**
+**Command succeeded; proof remains incomplete:**
 
-> "Executed verify tests. Result: 12 passed / 0 failed / 2 skipped (exit code: 0). All tests passed. Green build. Ready for test-critic."
+> "Executed verify tests: 12 passed / 0 failed / 2 skipped, exit code 0. The skipped tests' required/applicable status is unresolved, so the selected proof remains UNVERIFIED. Resolve their obligations and obtain any missing required proof; the 12 passing results remain available for review."
 
 **Tests failed:**
 
@@ -207,9 +232,9 @@ If you cannot extract counts safely, keep them `null`. Do not estimate.
 
 **AC-scoped semantics:**
 
-- `passed`: All tests for this AC passed (exit code 0)
+- `passed`: Applicable AC proof is satisfied by the actual selected tests or admissible original evidence; exit code 0 alone is insufficient
 - `failed`: One or more tests failed
-- `unknown`: Could not determine (filter didn't work, no tests found, etc.)
+- `unknown`: Required proof is missing, skipped without an applicable disposition, incomplete, or indeterminate (filter didn't work, no tests found, etc.)
 
 The file is the audit record. The handoff tells the orchestrator what to do next.
 
@@ -222,7 +247,10 @@ When you complete your work, recommend one of these to the orchestrator:
 - **fixer**: Applies targeted fixes for specific test failures. Use for small, surgical fixes.
 - **self-reviewer**: Reviews all Build artifacts for consistency. Use when tests pass and Build is ready for final review.
 
-**Your default recommendation is test-critic** when tests pass. If tests fail, recommend **code-implementer** or **fixer** depending on the nature of failures.
+Recommend **test-critic** for substantive review of available evidence. Do not
+equate that review handoff with completed proof. Preserve `UNVERIFIED` obligations
+and their next action; route actual failures to **code-implementer** or **fixer**
+according to the evidence.
 
 ## Philosophy
 

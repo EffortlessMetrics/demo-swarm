@@ -48,7 +48,11 @@ Mutation testing is computationally expensive. Running a full mutation suite on 
 
 ## Configuring Mutation Testing
 
-The `mutation-auditor` agent handles mutation testing in Flow 3 (Build). Configuration is optional; mutation testing will be skipped if no runner is configured.
+The `mutation-auditor` can perform selected local mutation proof in Flow 3
+(Build). The test plan and installed policy determine applicability and required
+or advisory status. If no runner is configured, an applicable required obligation
+remains unproven; an advisory omission is a limitation. Neither is a mutation
+pass. A local run does not request development CI.
 
 ### Configuration Options
 
@@ -78,6 +82,12 @@ If `demo-swarm.config.json` does not specify a command, the agent looks for repo
 4. `scripts/mutation.cmd`
 
 If none exist, mutation testing is skipped with an explicit "not configured" status.
+
+Keep conditional expensive-proof metadata in the existing test plan: property
+and failure witness, selecting scenario, actual scope/runner, execution phase,
+cost/deadline/resources and admissible evidence reuse. Five minutes is a default
+budget, not a universal proof limit. An expensive test can be the cheapest valid
+proof and should run when its condition applies. No tag alone enforces selection.
 
 ### Example Configurations
 
@@ -212,7 +222,12 @@ Mutation Score = Killed / (Killed + Survived) * 100
 
 Example: 45 killed, 3 survived = 45/(45+3) = 93.75%
 
-Timeouts and errors are typically excluded from the denominator since they indicate tool issues, not test quality.
+Use a completed, relevant selected scope and a nonzero denominator. Record the
+tool's score basis and exclusions; unresolved errors/timeouts or partial counts
+do not establish the required score. `mutation_threshold` is a minimum score
+percentage: pass the numeric criterion only when `score >= threshold`. A null
+threshold sets no numeric cutoff. Material survivors still need review even
+when the score meets its minimum.
 
 ---
 

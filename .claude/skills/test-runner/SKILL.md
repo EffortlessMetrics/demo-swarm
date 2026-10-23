@@ -8,18 +8,16 @@ allowed-tools: Bash, Read, Write
 
 You are a helper for running tests in this repository.
 
-The test-runner is a mechanical skill that executes tests and captures output. It does not make judgment calls about test quality or coverage. Those decisions belong to agents (test-critic, test-author).
+Execute the admitted test selection and capture output. Test quality and proof
+selection belong to the caller; do not silently widen or weaken that selection.
+In source-only review mode, do not execute candidate-controlled commands. Return
+the requested experiment to the admitted writer/proof worker.
 
 ---
 
 ## Purpose
 
-Execute the repository's test suite with appropriate scoping and capture structured output for downstream agents. The skill:
-
-- Runs tests (scoped or full)
-- Captures raw output and exit codes
-- Produces structured summaries with counts
-- Handles framework-specific invocation patterns
+Capture raw output, exit codes and structured counts for the selected invocation.
 
 **What this skill does NOT do:**
 
@@ -34,11 +32,23 @@ Execute the repository's test suite with appropriate scoping and capture structu
 
 | Context                        | Selection Strategy       | Example                            |
 | ------------------------------ | ------------------------ | ---------------------------------- |
-| **AC loop (Flow 3)**           | AC-scoped, fail-fast     | Run only tests for AC-001          |
-| **Post-AC verification**       | Changed-file scope       | Tests for files touched in this AC |
-| **Global hardening (Flow 3)**  | Full suite               | All tests after all ACs complete   |
-| **Gate verification (Flow 5)** | Full suite, no fail-fast | Comprehensive verification         |
-| **Quick sanity check**         | Smoke tests only         | Fast feedback during iteration     |
+| **AC loop (Flow 3)** | Relevant AC proof | Actual test IDs/files and useful failure policy |
+| **Post-AC verification** | Affected behavior/dependencies | Reassess proof after a material change |
+| **Hardening / qualification** | Admitted applicable obligations | Include expensive tests when their condition selects them |
+| **Quick sanity check** | Explicit smoke selection | Small observation; not a full qualification claim |
+
+Read the caller's selection, the existing test plan and native policy. Conditional
+or expensive proof records its obligation/witness, applicability scenario,
+selector and actual consumer, phase, cost/deadline/resources and evidence-reuse
+limits. Tags are selectors only when a runner consumes them. Missing scope or an
+unsupported filter is a selection gap, not permission to run everything.
+
+Reuse applicable original evidence where authorized; a new reviewer is not itself
+a reason to replay it. When required proof applies, execute it, reuse admissible
+evidence, or report it unproven. Budget expiry, zero matches and unavailable tools
+cannot satisfy that obligation. Keep expensive proof when it is the cheapest
+valid method; record and admit its actual cost. Local development execution does
+not request CI. On the selected queue route, CI qualifies the actual composition.
 
 ---
 
@@ -46,7 +56,9 @@ Execute the repository's test suite with appropriate scoping and capture structu
 
 ### 1. Run All Tests (Full Suite)
 
-Use when: Global hardening, Gate verification, or no scope information available.
+Use only when the admitted portfolio requires it or it is the cheapest valid
+method for the current obligation. Record that reason, cost and deadline. A flow
+name or missing scope does not select a full suite.
 
 ```bash
 # Rust
@@ -121,8 +133,8 @@ Use when: Quick sanity check, not full verification.
 # If smoke marker exists
 pytest -m smoke --color=yes
 
-# Or first N tests
-pytest --maxfail=5 -x
+# Use an existing explicit test selection when no smoke marker exists.
+# A failure limit such as -x does not select the first N tests or a smoke suite.
 ```
 
 ---
@@ -147,9 +159,16 @@ cargo test <full::path::to::test>
 # Integration test file
 cargo test --test <name>
 
-# With fail-fast (implicit with --test-threads=1)
-cargo test -- --test-threads=1
+# Serial execution, only when isolation requires it; this is not fail-fast
+cargo test <pattern> -- --test-threads=1
 ```
+
+Cargo stops after a failing test executable by default; tests within that
+executable run to completion. `--no-fail-fast` changes the executable-level
+policy. `--test-threads` controls concurrency. Do not substitute serialization
+for fail-fast or add unstable flags to a stable toolchain. See the
+[Cargo test contract](https://doc.rust-lang.org/cargo/commands/cargo-test.html)
+and [libtest options](https://doc.rust-lang.org/rustc/tests/index.html).
 
 ### Python (pytest)
 
@@ -218,11 +237,20 @@ go test -v ./...
 
 ### Raw Output
 
-Save raw test output to `test_output.log` (overwrite per run).
+Use the existing `test_output.log` working path. Before overwriting a result that
+is cited or needed for reuse, retain the original in the repository's existing
+run/artifact storage. Cite its source, command/environment, selected/executed
+tests, outcome and applicability; a later summary is not a new execution.
 
 ### Structured Summary
 
 Save parsed summary to `test_summary.md` with this structure:
+
+`Result: PASS | FAIL` describes an observed command outcome, not satisfaction of
+the proof portfolio. Record unproven obligations in Notes using `UNVERIFIED` and
+their next action. For no execution (including source-only mode or unavailable
+tooling), omit the command-result line, use null exit code/counts and explain
+the limitation; do not fabricate PASS/FAIL or extend serialized status enums.
 
 ```markdown
 # Test Summary
@@ -230,7 +258,7 @@ Save parsed summary to `test_summary.md` with this structure:
 ## Overall Status
 
 - **Result:** PASS | FAIL
-- **Exit Code:** <int>
+- **Exit Code:** <int|null>
 - **Duration:** <time>
 
 ## Counts
@@ -245,6 +273,10 @@ Save parsed summary to `test_summary.md` with this structure:
 
 - `path::to::test_name` - <short error>
 - `path::to::other_test` - <short error>
+
+## Notes
+
+- <applicable obligation dispositions; missing required proof remains UNVERIFIED; next action>
 
 ## Top Error Snippets
 ```
@@ -273,8 +305,8 @@ Use `null` for any count that cannot be reliably extracted.
 
 | Code | Meaning                   |
 | ---- | ------------------------- |
-| 0    | All tests passed          |
-| 1+   | One or more tests failed  |
+| 0    | Command succeeded; inspect selected/executed tests before claiming proof |
+| 1+   | Non-success; distinguish test, build, instrument or environment failure |
 | null | Command could not execute |
 
 ### Failure Output
@@ -375,62 +407,24 @@ Do not invent commands. If detection fails, record `missing_required` and bounce
 ### Example 1: AC-Scoped Run (Flow 3 Microloop)
 
 ```bash
-# Run tests for AC-001 only, fail-fast
-cargo test ac_001 -- --test-threads=1
+# Run matching AC-001 tests; Cargo's failure policy is per executable
+cargo test ac_001
 ```
 
-Output in `test_summary.md`:
+Record actual counts, exit code, duration and failing test IDs in
+`test_summary.md`. Confirm the intended tests matched; do not infer coverage
+from the AC filter's name.
 
-```markdown
-# Test Summary
-
-## Overall Status
-
-- **Result:** FAIL
-- **Exit Code:** 1
-- **Duration:** 4.2s
-
-## Counts
-
-- Passed: 3
-- Failed: 1
-- Skipped: 0
-
-## Failing Tests
-
-- `auth::tests::test_ac_001_invalid_password` - assertion failed: expected 401, got 200
-```
-
-### Example 2: Full Suite (Global Hardening)
+### Example 2: Explicitly Selected Full Suite
 
 ```bash
 cargo test --workspace --tests --color=always
 ```
 
-Output:
-
-```markdown
-# Test Summary
-
-## Overall Status
-
-- **Result:** PASS
-- **Exit Code:** 0
-- **Duration:** 45.3s
-
-## Counts
-
-- Passed: 127
-- Failed: 0
-- Skipped: 3
-- xfailed: 2
-- xpassed: 0
-
-## Notes
-
-- 3 tests skipped: require external service
-- 2 xfail tests: known issues tracked in #123, #124
-```
+For example, exit code 0 with 127 passed, 3 skipped and 2 xfailed is command
+success. Record those actual counts. The selected proof remains `UNVERIFIED`
+until applicable required obligations for the skipped/xfail cases are resolved;
+an unavailable service or known-issue link alone does not waive them.
 
 ### Example 3: Changed Files Scope
 
@@ -468,7 +462,9 @@ cargo test -p auth_service -p session_manager
 
 **Symptom:** Test command runs but finds nothing to test.
 
-**Solution:** This is valid output. Report `passed=0 failed=0 skipped=0`. The orchestrator decides if this is expected (new feature without tests yet) or a problem (tests deleted).
+**Solution:** Report the actual zero counts. If the selection was meant to
+establish an obligation, zero matching tests leave it unproven. If nothing was
+applicable, cite that separate decision; do not report a test pass for it.
 
 ---
 
@@ -482,8 +478,8 @@ cargo test -p auth_service -p session_manager
    - Prefer to keep runs bounded; if the full suite is required, note this in the summary.
 
 3. Capture output and artifacts:
-   - Save raw output to `test_output.log` (overwrite per run) and a parsed summary to `test_summary.md`.
-   - `test_summary.md` should include: overall status (PASS/FAIL), failing test names, top error snippets, and counts.
+   - Use `test_output.log` and `test_summary.md`, preserving cited original executions before replacing those working paths.
+   - `test_summary.md` distinguishes observed command outcome from obligation disposition, with actual failing test names, error snippets and counts.
 
 4. Failure handling:
    - Exit status is used by calling subagent; include failing test names in `test_summary.md`.

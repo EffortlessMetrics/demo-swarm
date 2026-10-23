@@ -77,7 +77,9 @@ For each scenario, assign one or more of:
 
 **If `api_contracts.yaml` exists, this step is mandatory.**
 
-The API contract is the truth; ACs are the verification instructions for that truth.
+Use the versioned API contract as the intended behavior to check. It can be
+wrong or stale: reconcile conflicts with requirements and current evidence,
+and record a justified contract correction rather than testing the mistake in.
 
 For every endpoint defined in `api_contracts.yaml`:
 
@@ -143,7 +145,11 @@ and add a concern explaining why.
 
 Decide whether mutation testing is **required**, **recommended**, or **not applicable** for this change:
 
-**Required** when:
+Use the installed policy and relevant proof alternatives. The following risks
+prompt a selection decision; they do not impose dynamic mutation on every such
+change when another admitted method establishes the property.
+
+**Consider required proof** when:
 
 - P0 security/auth/payment code is modified
 - Core business logic with high consequence of silent regression
@@ -154,7 +160,7 @@ Decide whether mutation testing is **required**, **recommended**, or **not appli
 - Moderate-risk code with complex conditionals
 - Areas with historical regression patterns
 
-**Not applicable** when:
+**Potentially inapplicable** when:
 
 - Pure config/infra changes
 - UI-only changes with no business logic
@@ -167,13 +173,38 @@ If mutation testing is required or recommended, specify:
 - `mutation_scope: [<module or path patterns>]` (which files/modules to target)
 - `mutation_tool_hint: <tool-name | null>` (e.g., `cargo-mutants`, `mutmut`, `stryker`; null = auto-detect)
 
-The mutator agent reads these fields to determine behavior:
+The `mutation-auditor` reads these fields with the current applicability decision:
 
-- If `mutation_required: true` and tool unavailable → mutator escalates
-- If `mutation_required: false` and tool unavailable → mutator proceeds with concern
-- If `mutation_threshold` is set → mutator compares score against it
+- If mutation is applicable and required but the tool or sufficient runtime is unavailable, the obligation remains unproven.
+- If mutation is advisory and unavailable, preserve that limitation without claiming mutation quality.
+- If `mutation_threshold` is set, compare only a completed, relevant result against it; a partial run's score is not the selected portfolio's score.
 
-### Step 4c: Check test data / fixture impact
+### Step 4c: Select proof and recurring execution separately
+
+An expensive test can be the cheapest valid proof of a specific property. Keep
+that proof and explain when it applies instead of either deleting it or running
+it for every change. Red/green or a meaningful negative control establishes what
+the test discriminates; it does not determine its recurring frequency.
+
+For a conditional or expensive obligation, record the following in the existing
+`test_plan.md` and repository-native test catalogue/configuration where supported:
+
+- **Obligation and witness:** behavior/property, realistic wrong behavior rejected, and required or advisory status under the installed policy.
+- **Applicability:** the scenario, changed dependency/path/configuration/platform or incident that selects it; record true, false with evidence, or unresolved for this candidate.
+- **Selector and consumer:** actual test IDs/markers and the runner command that consumes them. A tag without a selecting consumer does not implement scheduling.
+- **Execution phase:** local session proof, applicable integration qualification, or separately admitted deep/release work. Follow the installed route; ordinary development publication does not request CI in the selected target.
+- **Cost and limit:** observed setup/execution cost or unknown, required environment/resources, and a justified deadline. A budget cannot turn missing required proof into success.
+- **Reuse:** original execution identity and the source/configuration changes that invalidate its applicability. Preserve the witness even when it need not run again now.
+
+Use existing framework selectors; do not create a second live test registry.
+This plan metadata does not add fields to existing serialized receipts or claim
+that an automated selector has been installed. When a required condition is true,
+execute, reuse admissible evidence, or report the obligation unproven. When the
+condition is demonstrably false, retain the reason for non-selection. Unknown
+impact needs investigation or justified wider proof, not a silent skip or an
+automatic full-suite fallback.
+
+### Step 4d: Check test data / fixture impact
 
 When state transitions are planned (check `schema.md` for **State Transition Infrastructure** and `.runs/<run-id>/plan/migrations/`), assess whether test fixtures need updating:
 
@@ -241,6 +272,13 @@ Additional notes:
   - <module or path pattern>
 - mutation_tool_hint: <tool-name | null>
 - rationale: <why required/not required>
+
+## Conditional Proof Selection
+
+For each conditional/expensive obligation: obligation and failure witness;
+applicability and this candidate's disposition; selector and actual consumer;
+execution phase; cost/deadline/resources; original evidence and reuse limits.
+Link the repository-native policy/configuration rather than duplicating it.
 
 ## Scenario → Test Type Matrix
 
