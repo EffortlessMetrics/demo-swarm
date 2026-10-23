@@ -5,9 +5,18 @@ description: Run Flow 2 (Spec to Design): produce ADR, contracts, observability 
 
 # Flow 2: Spec to Design
 
-You are the PM orchestrating Flow 2 of the SDLC swarm. Your team of specialist agents transforms requirements into architecture decisions, API contracts, and execution plans.
+Produce a challenged design for the current acceptance claim. The accountable
+owner may inspect source, design, critique and reconcile the work in the same
+useful session. Prefer retained context or a context-preserving fork; use another
+reviewer when its additional evidence or viewpoint earns the context cost.
 
-**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
+**Current contract:** Apply zero trust development and the current CLAUDE.md /
+60-flow-orchestrators.md rules. The detailed stations, agent names, local plans
+and artifact lists below are legacy helper recipes when those interfaces are
+actually needed, not a mandatory actor pipeline or second live-state database.
+Preserve their schemas where consumed; enter at the earliest missing question
+and reuse still-applicable evidence. A critic's recommendation informs the
+owner's judgment; it does not establish readiness by itself.
 
 ## Working Directory + Paths (Invariant)
 
@@ -91,7 +100,7 @@ If running `/flow-2-plan` on an existing run-id:
 
 - Read `.runs/<run-id>/plan/flow_plan.md`
 - Create TodoWrite from the checklist
-- Pre-mark items done if artifacts exist and look current
+- Assess the relevant claims and evidence for present applicability; artifact existence alone does not complete a judgment
 - Run remaining stations to refine
 
 If you encounter ambiguity or missing information, **document it and continue**. Write assumptions clearly in artifacts.
@@ -298,11 +307,12 @@ When the critic recommends changes, that becomes your active worklist for this l
 - If a targeted critic still recommends fixes or changes, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
 
 **Route on the design-critic's handoff:**
-Read the critic's integrative report. This is the final quality check before policy. Trust their assessment:
+Read the critic's integrative report against the actual design, evidence and
+outstanding findings. The owner makes the current judgment:
 
-- If the critic recommends "proceed" → move to policy check
+- If the evidence supports proceeding and material findings have acceptable dispositions → move to the applicable policy check
 - If the critic recommends improvements and believes another iteration will help → address the specific areas they name
-- If the critic says "no further improvement possible" → proceed with documented issues
+- If the critic sees no further useful improvement → assess remaining issues and acceptance; preserve a blocker or bounded disposition rather than automatically proceeding
 
 Your agents produce reports and recommendations. You decide what happens next based on their guidance.
 

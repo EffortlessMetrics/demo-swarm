@@ -48,7 +48,7 @@ new branch merely to satisfy a naming recipe.
 Use test-author/test-critic, code-implementer/code-critic, test-executor,
 standards-enforcer, mutation-auditor, fuzz-triager, doc-writer/doc-critic or other
 existing specialists only when their work is useful. Mutation/fuzz/full suites
-are selected proof, not automatic per-edit taxes. A paused source-only reviewer
+are selected proof, not automatic per-edit taxes. A source-only reviewer
 must not execute candidate-controlled code; ask the warm worker for an experiment.
 
 A changed premise returns to its owner immediately. There is no mandatory

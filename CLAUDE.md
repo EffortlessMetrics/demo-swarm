@@ -43,6 +43,21 @@ Enqueue is conditional authorization to land, not a neutral test request. Do not
 use generic auto-merge to bypass the legacy final decision. Release authority,
 existing helper schemas and all unaffected review/evidence controls stay separate.
 
+## Zero trust development
+
+We practice **zero trust development** and **fallibilism**: any recorded claim,
+issue, specification, agent report, test or tool can be wrong. The maintainer's
+direction governs intent; evidence governs factual claims. Acceptance does not
+make a specification's premises infallible, and a green result does not prove
+that the right behavior was exercised.
+
+Use prior evidence rather than starting from scratch. Check the load-bearing
+premises of the next decision, relevant changes, contradictions and unsupported
+claims. Preserve still-applicable proof with its original provenance. When a
+finding changes the understanding, update the governing issue/specification and
+affected conclusions with what changed and why. Each work unit should improve
+the shared state, without a new ledger or a status post for every internal step.
+
 ## Entry and ownership
 
 Continue actionable work on the owned PR before creating a duplicate. Resolve a
@@ -54,7 +69,12 @@ Keep one integration owner and one writer for contested candidate surfaces.
 Read-only investigation and review need no reservation. Delegate when another
 context, tool, oracle or perspective changes what we can discover. The root may
 perform bounded work directly and must reconcile delegated results. A role name
-does not establish independence or prohibit useful work.
+does not establish independence or prohibit useful work. Prefer the same useful
+session or a context-preserving fork for successive review questions and repairs.
+Use a separate reviewer when its different evidence, method or viewpoint earns
+the context acquisition and coordination cost. The owning session may judge
+readiness and use the authorized integration route with its applicable native or
+orchestrator checks; a new merge agent is not required.
 
 Return to the earliest question invalidated by new evidence. Do not restart the
 whole process after an unrelated SHA change. Do not treat an unchanged SHA as
@@ -82,13 +102,25 @@ package, release, upstream-promotion or production-deployment authority.
 Challenge premise, plan, test stimulus/oracle, production use, error paths,
 compatibility, test economics, simplicity, documentation and product fit where
 relevant. Keep the writer and useful build context warm while readers challenge
-the candidate. A first green test is not a completed review.
+the candidate. A first green test is not a completed review. For a behavior change,
+show what was wrong or missing and a proof that rejects it, then the intended
+passing behavior. If literal red/green is unavailable, explain the limitation and
+use a meaningful differential, negative control, model or other discriminator.
+Demonstrating the repair and deciding how often to run that proof are separate
+decisions; use cost-appropriate test tiers.
 
 For evidence retain actual source bytes or immutable identity, selected and
 executed subjects, command/environment, outcome, capture limitations and an
 accessible original. HEAD alone does not identify dirty or staged source. A
 hash authenticates neither the producer nor the fact of execution. Preserve
 historical results; separately decide present applicability.
+
+A source-only scanner may consume this evidence, source and versioned intent;
+it must not build, test or execute candidate-controlled behavior. A hook may
+publish a compact evidence contribution through an authorized native interface
+without starting CI. Author claims remain claims, original evidence stays
+attributable, and missing experiments return to an admitted coding/proof worker.
+Reviewer independence does not grant execution or integration authority.
 
 Use existing tool shims rather than assuming installed PATH helpers:
 

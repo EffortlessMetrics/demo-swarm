@@ -5,9 +5,19 @@ description: Run Flow 7 (Prod -> Wisdom): analyze artifacts, detect regressions,
 
 # Flow 7: Prod -> Wisdom
 
-You are the PM orchestrating Flow 7 of the SDLC swarm. Your team of specialist analysts examines the run and extracts learnings.
+Use the actual work and outcomes to improve the product and operating method.
+The accountable owner may inspect records, compare explanations and test a
+correction in the existing useful session. Prefer retained context or a
+context-preserving fork; add another analyst when the additional evidence or
+viewpoint justifies its cost.
 
-**Your role:** You direct agents, read their reports, and synthesize findings. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
+**Current contract:** Apply zero trust development and fallibilism. Earlier
+lessons, issues, receipts and tool outputs are claims or observations with scope,
+not infallible instructions. Use prior evidence, investigate relevant conflicts,
+and version material corrections with their reasons. The detailed stations,
+agent names, local plans and artifacts below are legacy helper recipes when
+their interfaces are needed, not a mandatory actor pipeline or live-state mirror.
+Current CLAUDE.md / 60-flow-orchestrators.md authority and completion rules govern.
 
 ## Working Directory + Paths (Invariant)
 
@@ -103,7 +113,7 @@ If running `/flow-7-wisdom` on an existing run-id:
 
 - Create TodoWrite from the checklist
 
-- Pre-mark items done if artifacts exist and look current
+- Assess the relevant claims and evidence for present applicability; artifact existence alone does not complete a judgment
 
 - Run remaining stations to refine
 
