@@ -27,6 +27,13 @@ The October 21 RIPR/Perl ruling selects native queue-time qualification. Follow
 for its target, safe cutover, rollback and acceptance cases. Selection is not
 activation and does not opt every pack consumer into a queue.
 
+The October 22 clarification requires no CI workflow on Draft, Ready or ordinary
+publication/update events in the selected steady state. Run useful focused tests
+and substantive review locally before enqueue. Required PR admission context
+publication is a separate explicit admission operation, not permission to retain
+a cheap PR-triggered workflow. Its producer and native enforcement must be
+qualified; missing admission is not success.
+
 Where older rules, helpers or explanation docs forbid queues universally or put
 all final judgment after qualification, this mode-specific contract governs:
 keep the installed legacy route until the consumer verifies its replacement;
@@ -100,8 +107,8 @@ Stage only intended source. Preserve unrelated staged/unstaged work. Scan the
 actual publication surface for secrets and run applicable focused validation
 before committing. Do not make evidence-only or empty commits to wake CI.
 
-The target keeps commits, pushes and Draft/Ready cheap. Review can complete
-before independent qualification has run. Explicitly request the current
+The selected target starts no CI on commits, ordinary pushes or Draft/Ready
+transitions. Local proof and source review precede native queue qualification. Explicitly request the current
 reviewed candidate through the installed adapter; retain request identity and
 readback. A retained label cannot authorize a successor. A lost response needs
 reconciliation, not blind retry.
